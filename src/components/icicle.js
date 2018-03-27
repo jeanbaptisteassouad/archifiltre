@@ -5,6 +5,7 @@ import { selectDatabase, selectLogError } from 'reducers/root-reducer'
 import { setParentPath } from 'reducers/database'
 
 import ExportButton from 'components/export-button'
+import UploadButton from 'components/upload-button'
 import ReinitButton from 'components/reinit-button'
 import ErrorLogButton from 'components/error-log-button'
 
@@ -44,7 +45,9 @@ const Presentational = props => {
           <div id='sidebar' style={{"textAlign":"center"}}>
           <p>{props.nb_files} {tr("files loaded")}<br />{props.nb_errors} {tr("errors")}</p>
           <ErrorLogButton /><br /><br />
-            <ExportButton /><span>      </span><ReinitButton />
+            <ExportButton /><br />
+            <UploadButton /><br />
+            <ReinitButton />
             <h5>{tr("Legend")}</h5>
             <div id='legend'></div>
           </div>

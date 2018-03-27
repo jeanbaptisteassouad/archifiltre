@@ -40,8 +40,8 @@ class Presentational extends React.Component {
     e.preventDefault()
   }
 
-  handleDrop (e) {
-    Folder.asyncHandleDrop(e,this.props.create,this.props.fromCsv,this.props.logError)
+  handleDrop (e) { 
+   Folder.asyncHandleDrop(e,this.props.create,this.props.fromCsv,this.props.logError)
           .then(this.props.finishedToLoadFiles)
     this.props.startToLoadFiles()
   }

@@ -1,36 +1,35 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { reInit as re1 } from 'reducers/database'
-import { reInit as re2 } from 'reducers/app-state'
-import { reInit as re3 } from 'reducers/log-error'
+import { selectDatabase } from 'reducers/root-reducer'
+import { upload } from 'upload'
 
 import { tr } from 'dict'
+
 
 const buttons_style = {
   width: '80%',
   margin: '0.2em'
 }
 
+
 const Presentational = props => {
+
   return (
-    <button type="button" style={buttons_style} onClick={props.reInitStateApp}>{tr("Reset")}</button>
+    <button type="button" style={buttons_style} onClick={()=>props.uploadFiles()}>{tr("Index files")}</button>
   )
 }
 
 
 const mapStateToProps = state => {
-  return {}
+  let database = selectDatabase(state)
+  return {
+    uploadFiles: () => database.uploadFiles()
+  }
 }
 
 const mapDispatchToProps = dispatch => {
-  return {
-    reInitStateApp: (...args) => {
-      dispatch(re1())
-      dispatch(re2())
-      dispatch(re3())
-    }
-  }
+  return {}
 }
 
 

@@ -41,6 +41,11 @@ const dict = {
     en: "Export error log",
     es: "Exportar errores"
   },
+  "Index files": {
+    fr: "Indexer les fichiers",
+    en: "Index files",
+    es: "Indizar archivos"
+  },
   "Reset": {
     fr: "Réinitialiser",
     en: "Reset",

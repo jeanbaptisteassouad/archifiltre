@@ -5,6 +5,8 @@ import { generateRandomString } from 'random-gen'
 import duck from 'reducers/duck'
 
 import { toCsvLine, fromCsvLine } from 'csv'
+import { readFile } from 'folder'
+import { indexFile } from 'upload'
 
 const type = 'cheapExp/database'
 
@@ -55,6 +57,12 @@ function mkS(map,parent_path) {
     toCsvNoFilter: () => map.reduce((acc,val) =>
       acc + toCsvLine([val.path.join('/'), val.size])
     ,''),
+    uploadFiles: () => {
+      map.forEach(val=> {
+        readFile(val.pointer).then(file_content =>
+          indexFile({name: val.path[val.path.length-1], size: val.size, path: val.path, content: file_content}))
+      })
+    },
     size: () => map.size,
     parent_path: () => parent_path.slice(),
     [key]: {
@@ -70,10 +78,11 @@ const { mkA, reducer } = duck(type, initialState)
 
 export default reducer
 
-export const create = mkA((path,size) => state =>
+export const create = mkA((path,size, pointer) => state =>
   mkS(state[key].map.set(mkId(), {
     path:path.split('/'),
-    size
+    size,
+    pointer
   }), state[key].parent_path)
 )
 

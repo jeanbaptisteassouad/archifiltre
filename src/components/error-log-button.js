@@ -8,10 +8,15 @@ import { generateRandomString } from 'random-gen'
 
 import { tr } from 'dict'
 
+const buttons_style = {
+  width: '80%',
+  margin: '0.2em'
+}
+
 
 const Presentational = props => {
   return (
-    <button type="button" onClick={()=> {
+    <button type="button" style={buttons_style} onClick={()=> {
       let report_name = 'error_log_report_'+generateRandomString(40)
       exportCsv(props.getCsv(),report_name)
     }}>{tr("Export error log")}</button>

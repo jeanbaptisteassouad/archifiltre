@@ -6,10 +6,15 @@ import { exportCsv } from 'csv'
 
 import { tr } from 'dict'
 
+const buttons_style = {
+  width: '80%',
+  margin: '0.2em'
+}
+
 const Presentational = props => {
 
   return (
-    <button type="button" onClick={()=>exportCsv(props.getCsv())}>{tr("Export")}</button>
+    <button style={buttons_style} type="button" onClick={()=>exportCsv(props.getCsv())}>{tr("Export")}</button>
   )
 }
 
