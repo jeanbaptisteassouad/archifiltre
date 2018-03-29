@@ -60,7 +60,7 @@ function mkS(map,parent_path) {
     uploadFiles: () => {
       map.forEach(val=> {
         readFile(val.pointer).then(file_content =>
-          indexFile({name: val.path[val.path.length-1], size: val.size, path: val.path, content: file_content}))
+          indexFile({name: val.path[val.path.length-1], size: val.size, path: val.path, content: file_content}, "game"))
       })
     },
     size: () => map.size,
