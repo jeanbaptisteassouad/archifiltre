@@ -287,10 +287,6 @@ export function plot(csv_string, setParentPath, parent_path) {
   }
 
   function computeRulerTextDisplayMode(candidate_position, text_length, w, fw){
-    console.log(candidate_position)
-    console.log(text_length)
-    console.log(w)
-    console.log(fw)
 
     if(candidate_position < text_length*fw){
       return "LEFT"
@@ -411,6 +407,10 @@ export function plot(csv_string, setParentPath, parent_path) {
     return root;
   };
 
+  function areDupes (d1, d2) {
+    return d1.value === d2.value && d1 !== d2;
+  }
+
   // ################### EVENT HANDLING ##################
 
   // ### CLICK EVENTS
@@ -453,11 +453,16 @@ export function plot(csv_string, setParentPath, parent_path) {
   }
 
   function unlockNodes(d){
+    d3.selectAll(".node")
+      .style("stroke", "white")
+      .style("stroke-dasharray", "none")
+
     d3.selectAll(".node, .node-text")
       .on("mouseover", mouseover)
       .style("opacity", 1)
     d3.select("#container").on("mouseleave", mouseleave)
     d3.select("#container").on("mouseover", null);
+
     makeDummyReport()
     makeDummyBreadcrumbs()
     makeDummyRuler()
@@ -480,12 +485,23 @@ export function plot(csv_string, setParentPath, parent_path) {
     d3.selectAll(".node, .node-text")
         .style("opacity", 0.3);
 
+    d3.selectAll(".node")
+        .style("stroke", "white")
+        .style("stroke-dasharray", "none")
+
     // Then highlight only those that are an ancestor of the current segment.
     vis.selectAll(".node, .node-text")
         .filter(function(node) {
                   return (sequenceArray.indexOf(node) >= 0);
                 })
         .style("opacity", 1);
+
+    // Then highlight duplicates.
+    vis.selectAll(".node")
+        .filter(function(node) { return areDupes(d, node); })
+        .style("stroke", "red")
+        .style("stroke-dasharray", "3,3")
+        .style("opacity", "1")
   }
 
   function mouseoverAlt(d, locked_node) {
