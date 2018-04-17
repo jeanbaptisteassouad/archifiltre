@@ -142,6 +142,10 @@ const dict = {
     fr: "pourcentage du total",
     en: "percentage of the whole"
   },
+  "duplicates found" : {
+    fr: "doublons trouvés",
+    en: "duplicates found"
+  },
 
 
     // Always displayed
