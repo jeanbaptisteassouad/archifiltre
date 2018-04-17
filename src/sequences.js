@@ -804,8 +804,10 @@ export function plot(csv_string, setParentPath, parent_path) {
     // d3.select("#report-hash")
       // .text(tr("Hash") + " : " + d.hash)
 
+    var dupes_string = (nb_dupes ? (nb_dupes-1 ? nb_dupes + " " + tr("duplicates found") : tr("1 duplicate found")) : tr("No duplicates found"))
+
     d3.select("#report-dupes")
-      .text(nb_dupes + " " + tr("duplicates found"))
+      .text(dupes_string)
   }
 
   function updateRuler(nodeArray){

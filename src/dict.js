@@ -146,6 +146,14 @@ const dict = {
     fr: "doublons trouvés",
     en: "duplicates found"
   },
+  "1 duplicate found" : {
+    fr: "1 doublon trouvé",
+    en: "1 duplicate found"
+  },
+  "No duplicates found" : {
+    fr : "Aucun doublon trouvé",
+    en: "No duplicates found"
+  },
 
 
     // Always displayed
