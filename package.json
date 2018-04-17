@@ -38,6 +38,7 @@
     "webpack": "4.1.0"
   },
   "dependencies": {
+    "md5": "2.2.1",
     "d3": "3.5.17",
     "immutable": "4.0.0-rc.9",
     "react": "16.0.0",

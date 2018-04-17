@@ -457,7 +457,9 @@ export function plot(csv_string, setParentPath, parent_path) {
   }
 
   function areDupes (d1, d2) {
-    return d1.value === d2.value && !(isAncestorOf(d2, d1)) && !(isAncestorOf(d1, d2)) && d2.depth && !(isAParentFolder(remakePath(d2)));
+    return d1.hash !== undefined && d1.hash === d2.hash && d1 !== d2
+    // return d1.hash === d2.hash && !(isAncestorOf(d2, d1)) && !(isAncestorOf(d1, d2)) && d2.depth && !(isAParentFolder(remakePath(d2)));
+    
   }
 
   // ################### EVENT HANDLING ##################
@@ -724,8 +726,8 @@ export function plot(csv_string, setParentPath, parent_path) {
     d3.select("#report-name")
       .text(tr("Folder of file's name"))
 
-    d3.select("#report-hash")
-      .text(tr("Hash") + " : " + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    // d3.select("#report-hash")
+      // .text(tr("Hash") + " : " + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 
     d3.select("#report-dupes")
       .text("X " + tr("duplicates found"))  }
@@ -799,8 +801,8 @@ export function plot(csv_string, setParentPath, parent_path) {
     d3.select("#report-name")
       .text(d.name)
 
-    d3.select("#report-hash")
-      .text(tr("Hash") + " : " + d.hash)
+    // d3.select("#report-hash")
+      // .text(tr("Hash") + " : " + d.hash)
 
     d3.select("#report-dupes")
       .text(nb_dupes + " " + tr("duplicates found"))

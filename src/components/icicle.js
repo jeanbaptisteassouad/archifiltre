@@ -27,6 +27,7 @@ const ruler_style = {
   'height': '50pt',
   // 'background-color': 'rgba(100,100,100,0.2)'
 }
+             // <span id="report-hash"></span><br />
 
 
 const Presentational = props => {
@@ -38,7 +39,6 @@ const Presentational = props => {
            <div className="mdl-cell mdl-cell--8-col">
              <i className="material-icons" id="report-icon" style={{'fontSize': '4.5em'}}></i><br />
              <span  id="report-name" style={{'fontWeight': 'bold'}}></span><br />
-             <span id="report-hash"></span><br />
              <span id="report-dupes"></span>
            </div>
            <div className="mdl-layout-spacer"></div>

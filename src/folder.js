@@ -1,5 +1,6 @@
 
 import { mkScheduler } from 'scheduler'
+import md5 from 'md5'
 
 const sch = mkScheduler()
 
@@ -58,9 +59,8 @@ export function readFile(file) {
 
 function makeHash(file){
   return new Promise((resolve, reject) => {
-    readFile(file).then(text => {resolve(text.split('\n')[0])})
+    readFile(file).then(text => {resolve(md5(text))})
   })
-  // return readFile(file).then(text => text.split('\n')[0])
 }
 
 
@@ -79,7 +79,6 @@ function traverseFile(insert2DB, logError, entry, path) {
         insert2DB(path + file.name, file.size, hash)
         resolve()
       })
-      // insert2DB(path + file.name, file.size, makeHash(file))
     }, e => {
       console.log(e)
       logError(path+entry.name,e)
