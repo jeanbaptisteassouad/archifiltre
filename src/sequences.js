@@ -22,14 +22,14 @@ export function plot(csv_string, setParentPath, parent_path) {
 
   // Mapping of step names to colors.
   var colors = {
-    presentation : {label: tr("Presentation"), color:"#f75b40"},
-    parent_folder : {label: tr("Root"), color: "#f99a0b"},
-    folder : {label: tr("Folder"), color:"#fabf0b"},
-    spreadsheet : {label: tr("Spreadsheet"), color:"#52d11a"},
-    email: {label: tr("E-mail"), color:"#13d6f3"},
-    doc : {label: tr("Document"), color:"#4c78e8"},
-    multimedia: {label: tr("Multimedia"), color:"#b574f2"},
-    otherfiles : {label: tr("Others"), color:"#8a8c93"}
+    presentation : {id: 1, label: tr("Presentation"), color:"#f75b40"},
+    parent_folder : {id: 2, label: tr("Root"), color: "#f99a0b"},
+    folder : {id: 3, label: tr("Folder"), color:"#fabf0b"},
+    spreadsheet : {id: 4, label: tr("Spreadsheet"), color:"#52d11a"},
+    email: {id: 5, label: tr("E-mail"), color:"#13d6f3"},
+    doc : {id: 6, label: tr("Document"), color:"#4c78e8"},
+    multimedia: {id: 7, label: tr("Multimedia"), color:"#b574f2"},
+    otherfiles : {id: 8, label: tr("Others"), color:"#8a8c93"}
   };
 
 
@@ -44,12 +44,16 @@ export function plot(csv_string, setParentPath, parent_path) {
   }
 
   function colorOf(name, children, path) {
+    return typeOf(name, children, path).color;
+  }
+
+  function typeOf(name, children, path) {
     
     if (children !== undefined) {
       if (isAParentFolder(path)) {
-        return colors.parent_folder.color;
+        return colors.parent_folder;
       } else {
-        return colors.folder.color;
+        return colors.folder;
       }
     } else {
       var m = name.match(/\.[^\.]*$/)
@@ -69,7 +73,7 @@ export function plot(csv_string, setParentPath, parent_path) {
         case ".csv": // format Csv
         case ".ods": //formats OOo/LO Calc
         case ".ots":
-          return colors.spreadsheet.color;
+          return colors.spreadsheet;
         case ".doc":  //formats Microsoft Word
         case ".docx":
         case ".docm":
@@ -80,7 +84,7 @@ export function plot(csv_string, setParentPath, parent_path) {
         case ".ott":
         case ".txt": // formats texte standard
         case ".rtf":
-          return colors.doc.color;
+          return colors.doc;
         case ".ppt": // formats Microsoft PowerPoint
         case ".pptx":
         case ".pptm":
@@ -90,11 +94,11 @@ export function plot(csv_string, setParentPath, parent_path) {
         case ".odp": // formats OOo/LO Impress
         case ".otp":
         case ".pdf": // On considère le PDF comme une présentation
-          return colors.presentation.color;
+          return colors.presentation;
         case ".eml": //formats d'email et d'archive email
         case ".msg":
         case ".pst":
-          return colors.email.color;
+          return colors.email;
         case ".jpeg": //formats d'image
         case ".jpg":
         case ".gif":
@@ -109,9 +113,9 @@ export function plot(csv_string, setParentPath, parent_path) {
         case ".mp4":
         case ".mov":
         case ".mkv":
-          return colors.multimedia.color;
+          return colors.multimedia;
         default:
-          return colors.otherfiles.color;
+          return colors.otherfiles;
         }
 
       }
@@ -136,12 +140,44 @@ export function plot(csv_string, setParentPath, parent_path) {
   var totalSize = 0; 
 
   var vis = d3.select("#chart").append("svg:svg")
+      .attr("id", "chart-svg")
       .attr("xmlns", "http://www.w3.org/2000/svg")
       // .attr("viewBox", "0 0 900 500")
-     .attr("viewBox", "0 0 "+width+" "+height)
+      .attr("viewBox", "0 0 "+width+" "+height)
       .attr("preserveAspectRatio", "xMidYMid meet")
       .append("svg:g")
-      .attr("id", "container");
+        .attr("id", "g-container")
+  
+  var defs = vis.append("svg:defs")
+
+  for (var key in colors){
+    if(colors.hasOwnProperty(key)){
+      var pattern = defs.append("svg:pattern")
+          .attr("id", "stripe-" + colors[key].id)
+          .attr("width", "4")
+          .attr("height", "20")
+          .attr("patternUnits", "userSpaceOnUse")
+          .attr("patternTransform", "rotate(45 0 0)")
+
+      pattern.append("svg:rect")
+            .attr("x", "0")
+            .attr("y", "0")
+            .attr("width", "4")
+            .attr("height", "20")
+            .style("fill", colors[key].color)
+            .style("opacity", "1")
+            .style("stroke", "none")
+      pattern.append("svg:line")
+            .attr("x1", "1")
+            .attr("y1", "0")
+            .attr("x2", "1")
+            .attr("y2", "20")
+            .style("stroke", "white")
+            .style("stroke-width", "2")
+            .style("opacity", "0.6")
+    }
+  }
+
 
   var partition = d3.layout.partition()
       .size([width, height])
@@ -407,8 +443,19 @@ export function plot(csv_string, setParentPath, parent_path) {
     return root;
   };
 
+  function isAncestorOf(parent, child){
+    var list = getAncestors(child)
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === parent) {
+            return true;
+        }
+    }
+
+    return false;
+  }
+
   function areDupes (d1, d2) {
-    return d1.value === d2.value && d1 !== d2;
+    return d1.value === d2.value && !(isAncestorOf(d2, d1)) && !(isAncestorOf(d1, d2)) && d2.depth && !(isAParentFolder(remakePath(d2)));
   }
 
   // ################### EVENT HANDLING ##################
@@ -454,8 +501,11 @@ export function plot(csv_string, setParentPath, parent_path) {
 
   function unlockNodes(d){
     d3.selectAll(".node")
-      .style("stroke", "white")
-      .style("stroke-dasharray", "none")
+      // .style("stroke", "white")
+      // .style("stroke-dasharray", "none")
+      .style("fill", function(d) { return colorOf(d.name, d.children, remakePath(d)); })
+
+    // d3.selectAll(".node-hatch").remove()
 
     d3.selectAll(".node, .node-text")
       .on("mouseover", mouseover)
@@ -474,20 +524,19 @@ export function plot(csv_string, setParentPath, parent_path) {
   // Fade all but the current sequence, and show it in the breadcrumb trail.
   function mouseover(d) {
 
-    updateReport(d)
-    
-
     var sequenceArray = getAncestors(d);
-    updateBreadcrumbs(sequenceArray)
-    updateRuler(sequenceArray)
 
     // Fade all the segments.
     d3.selectAll(".node, .node-text")
         .style("opacity", 0.3);
 
     d3.selectAll(".node")
-        .style("stroke", "white")
-        .style("stroke-dasharray", "none")
+      .style("fill", function(d) { return colorOf(d.name, d.children, remakePath(d)); })
+        // .style("stroke", "white")
+        // .style("stroke-dasharray", "none")
+
+
+    // d3.selectAll(".node-hatch").remove()
 
     // Then highlight only those that are an ancestor of the current segment.
     vis.selectAll(".node, .node-text")
@@ -497,11 +546,50 @@ export function plot(csv_string, setParentPath, parent_path) {
         .style("opacity", 1);
 
     // Then highlight duplicates.
-    vis.selectAll(".node")
+    var dupes = vis.selectAll(".node")
         .filter(function(node) { return areDupes(d, node); })
-        .style("stroke", "red")
-        .style("stroke-dasharray", "3,3")
+        .style("opacity", "0.5")
+        .style("fill", function(node) { return "url('#stripe-" + typeOf(node.name, node.children, remakePath(node)).id + "')"; })
+
+    vis.selectAll(".node-text")
+        .filter(function(node) { return areDupes(d, node); })
         .style("opacity", "1")
+
+    // var dupe_hatches = dupes.append("svg:rect")
+    //       .attr("class", "node-hatch")
+    //       .attr("x", function(node) { return node.x; })
+    //       .attr("y", function(node) { return node.y; })
+    //       .attr("width", function(node) { return node.dx; })
+    //       .attr("height", function(node) { return node.dy; })
+    //       .style("fill", "url('#diagonalHatch')")
+    //       // .style("opacity", 1)
+    //       .remove()
+
+    // // function selector_to_nodes (selector) {
+    // //     var node_list,
+    // //         nodes;
+    // //     if (!selector) {
+    // //         console.error('missing DOM selector string');
+    // //         return;
+    // //     }
+    // //     node_list = document.querySelectorAll(selector);
+    // //     // convert to array
+    // //     nodes = Array.prototype.slice.call(node_list);
+    // //     return nodes;
+    // // };
+
+    // // var nodes = selector_to_nodes(".node-hatch")
+
+    // console.log(dupe_hatches.node())
+
+    // if(dupe_hatches[0].length){
+    //   d3.select("#g-container").append(function () {return dupe_hatches.node()})
+    // }
+
+    updateReport(d, dupes[0].length)
+    updateBreadcrumbs(sequenceArray)
+    updateRuler(sequenceArray)      
+
   }
 
   function mouseoverAlt(d, locked_node) {
@@ -636,7 +724,9 @@ export function plot(csv_string, setParentPath, parent_path) {
 
     d3.select("#report-size")
       .text(tr("Size") + " : " + tr("absolute") + " | " + tr("percentage of the whole"))
-  }
+
+    d3.select("#report-dupes")
+      .text("X " + tr("duplicates found"))  }
 
   function makeDummyRuler(){
     updateRuler([])
@@ -696,7 +786,7 @@ export function plot(csv_string, setParentPath, parent_path) {
 
   }
 
-  function updateReport(d){
+  function updateReport(d, nb_dupes){
     d3.select("#report")
       .style('opacity',1)
 
@@ -709,6 +799,9 @@ export function plot(csv_string, setParentPath, parent_path) {
 
     d3.select("#report-size")
       .text(makeSizeString(d))
+
+    d3.select("#report-dupes")
+      .text(nb_dupes + " " + tr("duplicates found"))
   }
 
   function updateRuler(nodeArray){
