@@ -56,6 +56,13 @@ export function readFile(file) {
   
 }
 
+function makeHash(file){
+  return new Promise((resolve, reject) => {
+    readFile(file).then(text => {resolve(text.split('\n')[0])})
+  })
+  // return readFile(file).then(text => text.split('\n')[0])
+}
+
 
 function traverseFileTree(insert2DB, logError, entry, path) {
   if (entry.isFile) {
@@ -68,8 +75,11 @@ function traverseFileTree(insert2DB, logError, entry, path) {
 function traverseFile(insert2DB, logError, entry, path) {
   return new Promise((resolve, reject) => sch.schedule(() => {
     entry.file(file => {
-      insert2DB(path + file.name, file.size)
-      resolve()
+      makeHash(file).then(hash => {
+        insert2DB(path + file.name, file.size, hash)
+        resolve()
+      })
+      // insert2DB(path + file.name, file.size, makeHash(file))
     }, e => {
       console.log(e)
       logError(path+entry.name,e)

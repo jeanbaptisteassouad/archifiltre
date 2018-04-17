@@ -47,7 +47,7 @@ function mkS(map,parent_path) {
   return {
     toCsv: () => map.reduce((acc,val) => {
       if (filterPath(parent_path, val.path)) {
-        return acc + toCsvLine([val.path.join('/'), val.size])
+        return acc + toCsvLine([val.path.join('/'), val.size, val.hash])
       } else {
         return acc
       }
@@ -70,10 +70,11 @@ const { mkA, reducer } = duck(type, initialState)
 
 export default reducer
 
-export const create = mkA((path,size) => state =>
+export const create = mkA((path,size, hash) => state =>
   mkS(state[key].map.set(mkId(), {
     path:path.split('/'),
-    size
+    size,
+    hash
   }), state[key].parent_path)
 )
 

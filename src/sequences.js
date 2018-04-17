@@ -404,10 +404,12 @@ export function plot(csv_string, setParentPath, parent_path) {
     // for a partition layout. The first column is a sequence of step names, from
     // root to leaf, separated by hyphens. The second column is a count of how 
     // often that sequence occurred.
+    console.log(csv)
     var root = {"name": tr("Back to root"), "children": []};
     for (var i = 0; i < csv.length; i++) {
       var sequence = csv[i][0];
       var size = +csv[i][1];
+      var hash = csv[i][2];
       if (isNaN(size)) { // e.g. if this is a header row
         continue;
       }
@@ -435,7 +437,7 @@ export function plot(csv_string, setParentPath, parent_path) {
     currentNode = childNode;
         } else {
     // Reached the end of the sequence; create a leaf node.
-    childNode = {"name": nodeName, "size": size};
+    childNode = {"name": nodeName, "size": size, "hash": hash};
     children.push(childNode);
         }
       }
@@ -722,8 +724,8 @@ export function plot(csv_string, setParentPath, parent_path) {
     d3.select("#report-name")
       .text(tr("Folder of file's name"))
 
-    d3.select("#report-size")
-      .text(tr("Size") + " : " + tr("absolute") + " | " + tr("percentage of the whole"))
+    d3.select("#report-hash")
+      .text(tr("Hash") + " : " + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 
     d3.select("#report-dupes")
       .text("X " + tr("duplicates found"))  }
@@ -797,8 +799,8 @@ export function plot(csv_string, setParentPath, parent_path) {
     d3.select("#report-name")
       .text(d.name)
 
-    d3.select("#report-size")
-      .text(makeSizeString(d))
+    d3.select("#report-hash")
+      .text(tr("Hash") + " : " + d.hash)
 
     d3.select("#report-dupes")
       .text(nb_dupes + " " + tr("duplicates found"))
