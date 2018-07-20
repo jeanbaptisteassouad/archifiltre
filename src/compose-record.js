@@ -1,4 +1,6 @@
+import * as Arbitrary from 'test/arbitrary'
 
+import * as ArrayUtil from 'array-util'
 
 (function () {
   const Record = Immutable.Record
@@ -36,24 +38,12 @@
 
   const c = composeRecord(a,b)
 
-  console.log({a,b,c,factory:new c.constructor()})
+  console.log({a,get:a.get('auieau'),set:a.set('uieaue',23),b,c,factory:new c.constructor()})
 
 })()
 
 
 
-const Folder = Record({
-  name:'default_name',
-  alias:'',
-  comments:'',
-  children:List(),
-})
-
-
-const File = Record({
-  size:0,
-  last_modified:0,
-})
 
 
 
@@ -77,28 +67,56 @@ const TagDerivated = Record({
 })
 
 
-const FFs = Map()
 
-const zip = (a,b) => {
-  return a.map((a,i)=>[a,b[i]])
+
+
+
+
+
+
+
+
+
+
+export const arbitraryMockFile = () => {
+  return {
+    size:Arbitrary.natural(),
+    last_modified:Arbitrary.natural(),
+  }
 }
 
-const zip3 = (a,b,c) => {
-  return a.map((a,i)=>[a,b[i],c[i]])
+export const arbitraryPath = () => {
+  return '/'+Arbitrary.array(Arbitrary.string).join('/')
 }
 
+const v_folder = Record({
+  name:'default_name',
+  alias:'',
+  comments:'',
+  children:List(),
+})
 
 
-const a = (file,path) => {
+const v_file = Record({
+  size:0,
+  last_modified:0,
+})
+
+
+export const ffs = a => {
+  return a.map(__ffs__).reduce((acc,val)=>mergeFfs(val,acc), emptyFfs)
+}
+
+const __ffs__ = ([file,path]) => {
   const names = path.split('/')
   const ids = names.map((name,i)=>name+i)
   const childrens = ids.slice(1).map(a=>List.of(a)).concat([List()])
 
   let m = Map()
 
-  const loop = zip3(names,ids,childrens)
+  const loop = ArrayUtil.zip([names,ids,childrens])
   loop.forEach(([name,id,children])=>{
-    m = m.set(id,Folder({
+    m = m.set(id,v_folder({
       name,
       children,
     }))
@@ -106,7 +124,7 @@ const a = (file,path) => {
 
   ids.slice(-1).forEach(id=>{
     m = m.update(id,a=>{
-      return composeRecord(File({
+      return composeRecord(v_file({
         size:file.size,
         last_modified:file.lastModified,
       }),a)
@@ -116,10 +134,50 @@ const a = (file,path) => {
   return m
 }
 
-const b = (a,b) => {
+const emptyFfs = ()=>Map()
+
+const mergeFfs = (a,b) => {
   const merger = (oldVal, newVal) => {
     oldVal = oldVal.update('children',b=>b.concat(newVal.get('children')))
     return oldVal
   }
   return b.mergeWith(merger, a)
+}
+
+const reduceFfs = (reducer,m) => {
+  const rec = (id) => {
+    const node = m.get(id)
+    const children_ans_array = node.get('children').map(rec)
+    const [ans,next_node] = reducer(children_ans_array,node)
+    m = m.set(id,next_node)
+    return ans
+  }
+  return [rec('0'),m]
+}
+
+const ffsInv = m => {
+  const reducer = (children_ans_array,node) => {
+    if (children_ans_array.length === 0) {
+      const file = {
+        size:node.get('size'),
+        last_modified:node.get('last_modified'),
+      }
+      const path = node.get('name')
+      return [[[file,path]],node]
+    } else {
+      
+    }
+    return [,node]
+  }
+  return ffsInvRec(m['0'],m)
+}
+
+const ffsInvRec = (id,m) => {
+
+}
+
+
+
+const tags = () => {
+  return Map()
 }
