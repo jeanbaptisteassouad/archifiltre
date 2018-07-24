@@ -2,6 +2,7 @@ import * as Arbitrary from 'test/arbitrary'
 import * as Loop from 'test/loop'
 
 import * as ArrayUtil from 'array-util'
+import * as ListUtil from 'list-util'
 
 import { Record, List, Map, Set } from 'immutable'
 
@@ -46,6 +47,9 @@ import { Record, List, Map, Set } from 'immutable'
 
 // })()
 
+
+
+
 export const composeRecordFactory = (a,b) => {
   return Record(Object.assign({}, b().toObject(), a().toObject()))
 }
@@ -62,14 +66,6 @@ const composeObject = (a,b) => {
 
 
 
-const Derivated = Record({
-  size:0,
-  last_modified:[0],
-  depth:0,
-  nb_files:0,
-  sort_by_size_index:[],
-  sort_by_date_index:[],
-})
 
 
 const Tag = Record({
@@ -149,6 +145,14 @@ export const sortOrigin = a => a.sort((a,b)=>{
 
 
 
+
+
+
+
+
+
+
+
 const v_folder = Record({
   name:'',
   alias:'',
@@ -156,44 +160,44 @@ const v_folder = Record({
   children:List(),
 })
 
-const aaaa = a => {
-  return {
-    name:a.get('name'),
-    alias:a.get('alias'),
-    comments:a.get('comments'),
-    children:a.get('children').toArray(),
-  }
-}
+// const aaaa = a => {
+//   return {
+//     name:a.get('name'),
+//     alias:a.get('alias'),
+//     comments:a.get('comments'),
+//     children:a.get('children').toArray(),
+//   }
+// }
 
-const bbbb = a => {
-  return v_folder({
-    name:a.name,
-    alias:a.alias,
-    comments:a.comments,
-    children:List(a.children),
-  })
-}
+// const bbbb = a => {
+//   return {
+//     name:a.name,
+//     alias:a.alias,
+//     comments:a.comments,
+//     children:List(a.children),
+//   }
+// }
 
 
 
 const v_file = Record({
-  size:0,
-  last_modified:0,
+  file_size:0,
+  file_last_modified:0,
 })
 
-const aa = a => {
-  return {
-    size:a.get('size'),
-    last_modified:a.get('last_modified'),
-  }
-}
+// const aa = a => {
+//   return {
+//     file_size:a.get('file_size'),
+//     file_last_modified:a.get('file_last_modified'),
+//   }
+// }
 
-const bb = a => {
-  return v_file({
-    size:a.size,
-    last_modified:a.last_modified,
-  })
-}
+// const bb = a => {
+//   return {
+//     file_size:a.file_size,
+//     file_last_modified:a.file_last_modified,
+//   }
+// }
 
 
 export const ffs = a => {
@@ -214,8 +218,8 @@ export const ffs = a => {
     ids.slice(-1).forEach(id=>{
       m = m.update(id,a=>{
         return composeRecord(v_file({
-          size:file.size,
-          last_modified:file.lastModified,
+          file_size:file.size,
+          file_last_modified:file.lastModified,
         }),a)
       })
     })
@@ -255,8 +259,8 @@ export const ffsInv = m => {
   const reducer = ([children_ans_array,node]) => {
     if (children_ans_array.length === 0) {
       const file = {
-        size:node.get('size'),
-        lastModified:node.get('last_modified'),
+        size:node.get('file_size'),
+        lastModified:node.get('file_last_modified'),
       }
       const path = node.get('name')
       const ans = [[file, path]]
@@ -274,6 +278,103 @@ export const ffsInv = m => {
   const [ans,_] = reduceFfs(reducer,m)
   return ans
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const v_derivated = Record({
+  size:0,
+  last_modified_max:0,
+  last_modified_list:List(),
+  last_modified_min:Number.MAX_SAFE_INTEGER,
+  last_modified_median:null,
+  last_modified_average:null,
+  depth:0,
+  nb_files:0,
+  sort_by_size_index:List(),
+  sort_by_date_index:List(),
+})
+
+const mergeDerivated = (a,b) => {
+  b = b.update('size',b=>b+a.get('size'))
+  b = b.update('last_modified_list',b=>b.concat(a.get('last_modified_list')))
+  b = b.update('nb_files',b=>b+a.get('nb_files'))
+  return b
+}
+
+const afterMergeDerivated = a => {
+  const list = a.get('last_modified_list')
+  a = a.set('last_modified_max',list.max())
+  a = a.set('last_modified_min',list.min())
+  a = a.set('last_modified_median',ListUtil.median(list))
+  a = a.set('last_modified_average',ListUtil.average(list))
+  return a
+}
+
+const sortChildren = (children_ans_array,a) => {
+  const children_ans = List(children_ans_array)
+  a = a.set(
+    'sort_by_size_index',
+    ListUtil.indexSort(a=>a.get('size'),children_ans)
+  )
+  a = a.set(
+    'sort_by_date_index',
+    ListUtil.indexSort(a=>a.get('last_modified_average'),children_ans)
+  )
+  return a
+}
+
+export const computeDerivated = m => {
+  const reducer = ([children_ans_array,node]) => {
+    let ans
+    if (children_ans_array.length === 0) {
+      const flm = node.get('file_last_modified')
+      const size = node.get('file_size')
+      ans = v_derivated({
+        size,
+        last_modified_max:flm,
+        last_modified_list:List.of(flm),
+        last_modified_min:flm,
+        last_modified_median:flm,
+        last_modified_average:flm,
+        nb_files:1,
+      })
+    } else {
+      ans = children_ans_array.reduce((acc,val)=>mergeDerivated(val,acc))
+      ans = afterMergeDerivated(ans)
+      ans = sortChildren(children_ans_array,ans)
+    }
+    node = composeRecord(ans,node)
+    return [ans, node]
+  }
+  const [_,next_m] = reduceFfs(reducer,m)
+  return next_m
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
