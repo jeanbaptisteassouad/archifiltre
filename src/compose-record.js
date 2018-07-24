@@ -1,69 +1,13 @@
 import * as Arbitrary from 'test/arbitrary'
 import * as Loop from 'test/loop'
 
-import * as ArrayUtil from 'array-util'
-import * as ListUtil from 'list-util'
+import * as ArrayUtil from 'util/array-util'
+import * as ListUtil from 'util/list-util'
+import * as RecordUtil from 'util/record-util'
+
+import * as ObjectUtil from 'util/object-util'
 
 import { Record, List, Map, Set } from 'immutable'
-
-
-// (function () {
-//   const Record = Immutable.Record
-
-
-//   const composeRecordFactory = (a,b) => {
-//     return Record(Object.assign({}, b().toJS(), a().toJS()))
-//   }
-
-//   const composeRecord = (a,b) => {
-//     const factory = composeRecordFactory(a.constructor, b.constructor)
-//     return factory(Object.assign({}, b.toJS(), a.toJS()))
-//   }
-
-//   const f_a = Record({
-//     a:1,
-//     b:2,
-//     t:11,
-//   })
-
-//   const f_b = Record({
-//     c:3,
-//     d:4,
-//     t:22,
-//   })
-
-//   const a = f_a({
-//     a:31,
-//     b:-99,
-//   })
-//   const b = f_b({
-//     c:789,
-//     d:45,
-//   })
-
-//   const c = composeRecord(a,b)
-
-//   console.log({a,get:a.get('auieau'),set:a.set('uieaue',23),b,c,factory:new c.constructor()})
-
-// })()
-
-
-
-
-export const composeRecordFactory = (a,b) => {
-  return Record(Object.assign({}, b().toObject(), a().toObject()))
-}
-
-export const composeRecord = (a,b) => {
-  const factory = composeRecordFactory(a.constructor, b.constructor)
-  return factory(Object.assign({}, b.toObject(), a.toObject()))
-}
-
-const composeObject = (a,b) => {
-  return Object.assign({}, b, a)
-}
-
-
 
 
 
@@ -153,21 +97,19 @@ export const sortOrigin = a => a.sort((a,b)=>{
 
 
 
-const v_folder = Record({
+const v_folder = RecordUtil.createFactory({
   name:'',
   alias:'',
   comments:'',
   children:List(),
+}, a => {
+  return {
+    name:a.get('name'),
+    alias:a.get('alias'),
+    comments:a.get('comments'),
+    children:a.get('children').toArray(),
+  }
 })
-
-// const aaaa = a => {
-//   return {
-//     name:a.get('name'),
-//     alias:a.get('alias'),
-//     comments:a.get('comments'),
-//     children:a.get('children').toArray(),
-//   }
-// }
 
 // const bbbb = a => {
 //   return {
@@ -180,17 +122,15 @@ const v_folder = Record({
 
 
 
-const v_file = Record({
+const v_file = RecordUtil.createFactory({
   file_size:0,
   file_last_modified:0,
+}, a => {
+  return {
+    file_size:a.get('file_size'),
+    file_last_modified:a.get('file_last_modified'),
+  }
 })
-
-// const aa = a => {
-//   return {
-//     file_size:a.get('file_size'),
-//     file_last_modified:a.get('file_last_modified'),
-//   }
-// }
 
 // const bb = a => {
 //   return {
@@ -217,7 +157,7 @@ export const ffs = a => {
 
     ids.slice(-1).forEach(id=>{
       m = m.update(id,a=>{
-        return composeRecord(v_file({
+        return RecordUtil.compose(v_file({
           file_size:file.size,
           file_last_modified:file.lastModified,
         }),a)
@@ -296,7 +236,7 @@ export const ffsInv = m => {
 
 
 
-const v_derivated = Record({
+const v_derivated = RecordUtil.createFactory({
   size:0,
   last_modified_max:0,
   last_modified_list:List(),
@@ -307,6 +247,8 @@ const v_derivated = Record({
   nb_files:0,
   sort_by_size_index:List(),
   sort_by_date_index:List(),
+}, a => {
+  return {}
 })
 
 const mergeDerivated = (a,b) => {
@@ -329,7 +271,7 @@ const sortChildren = (children_ans_array,a) => {
   const children_ans = List(children_ans_array)
   a = a.set(
     'sort_by_size_index',
-    ListUtil.indexSort(a=>a.get('size'),children_ans)
+    ListUtil.indexSort(a=>a.get('size'),children_ans).reverse()
   )
   a = a.set(
     'sort_by_date_index',
@@ -358,7 +300,7 @@ export const computeDerivated = m => {
       ans = afterMergeDerivated(ans)
       ans = sortChildren(children_ans_array,ans)
     }
-    node = composeRecord(ans,node)
+    node = RecordUtil.compose(ans,node)
     return [ans, node]
   }
   const [_,next_m] = reduceFfs(reducer,m)
@@ -371,6 +313,15 @@ export const computeDerivated = m => {
 
 
 
+
+
+
+
+export const toJs = a => {
+  a = a.map(a=>a.constructor.toJs(a))
+  a = a.toObject()
+  return a
+}
 
 
 

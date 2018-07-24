@@ -3,7 +3,7 @@ const should = chai.should()
 
 import * as Loop from 'test/loop'
 import * as Arbitrary from 'test/arbitrary'
-import * as M from 'array-util'
+import * as M from 'util/array-util'
 
 describe('array-util', function() {
 
