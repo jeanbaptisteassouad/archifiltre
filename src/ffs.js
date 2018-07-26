@@ -7,29 +7,7 @@ import * as RecordUtil from 'util/record-util'
 
 import * as ObjectUtil from 'util/object-util'
 
-import { Record, List, Map, Set } from 'immutable'
-
-
-
-
-const Tag = Record({
-  name:'',
-  ff_ids:[],
-})
-
-const TagDerivated = Record({
-  size:0,
-})
-
-
-
-
-
-
-
-
-
-
+import { List, Map, Set } from 'immutable'
 
 
 
@@ -102,42 +80,28 @@ const v_folder = RecordUtil.createFactory({
   alias:'',
   comments:'',
   children:List(),
-}, a => {
-  return {
-    name:a.get('name'),
-    alias:a.get('alias'),
-    comments:a.get('comments'),
-    children:a.get('children').toArray(),
-  }
+},{
+  toJs: a => {
+    a.children = a.children.toArray()
+    return a
+  },
+  fromJs: a => {
+    a.children = List(a.children)
+    return a
+  },
 })
 
-// const bbbb = a => {
-//   return {
-//     name:a.name,
-//     alias:a.alias,
-//     comments:a.comments,
-//     children:List(a.children),
-//   }
-// }
 
 
 
 const v_file = RecordUtil.createFactory({
   file_size:0,
   file_last_modified:0,
-}, a => {
-  return {
-    file_size:a.get('file_size'),
-    file_last_modified:a.get('file_last_modified'),
-  }
+},{
+  toJs: a => a,
+  fromJs: a => a,
 })
 
-// const bb = a => {
-//   return {
-//     file_size:a.file_size,
-//     file_last_modified:a.file_last_modified,
-//   }
-// }
 
 
 export const ffs = a => {
@@ -195,6 +159,18 @@ const reduceFfs = (reducer,m) => {
   return [rec(''),m]
 }
 
+const diveFfs = (diver,first_ans,m) => {
+  const rec = (parent_ans,id) => {
+    const node = m.get(id)
+    const [ans,next_node] = diver([parent_ans,node])
+    m = m.set(id,next_node)
+    node.get('children').forEach(id=>rec(ans,id))
+  }
+  rec(first_ans,'')
+
+  return m
+}
+
 export const ffsInv = m => {
   const reducer = ([children_ans_array,node]) => {
     if (children_ans_array.length === 0) {
@@ -236,7 +212,7 @@ export const ffsInv = m => {
 
 
 
-const v_derivated = RecordUtil.createFactory({
+const v_derived = RecordUtil.createFactory({
   size:0,
   last_modified_max:0,
   last_modified_list:List(),
@@ -247,18 +223,30 @@ const v_derivated = RecordUtil.createFactory({
   nb_files:0,
   sort_by_size_index:List(),
   sort_by_date_index:List(),
-}, a => {
-  return {}
+},{
+  toJs: a => {
+    a.last_modified_list = a.last_modified_list.toArray()
+    a.sort_by_size_index = a.sort_by_size_index.toArray()
+    a.sort_by_date_index = a.sort_by_date_index.toArray()
+    return a
+  },
+  fromJs: a => {
+    a.last_modified_list = List(a.last_modified_list)
+    a.sort_by_size_index = List(a.sort_by_size_index)
+    a.sort_by_date_index = List(a.sort_by_date_index)
+    return a
+  },
 })
 
-const mergeDerivated = (a,b) => {
+
+const mergeDerived = (a,b) => {
   b = b.update('size',b=>b+a.get('size'))
   b = b.update('last_modified_list',b=>b.concat(a.get('last_modified_list')))
   b = b.update('nb_files',b=>b+a.get('nb_files'))
   return b
 }
 
-const afterMergeDerivated = a => {
+const afterMergeDerived = a => {
   const list = a.get('last_modified_list')
   a = a.set('last_modified_max',list.max())
   a = a.set('last_modified_min',list.min())
@@ -280,13 +268,13 @@ const sortChildren = (children_ans_array,a) => {
   return a
 }
 
-export const computeDerivated = m => {
+export const computeDerived = m => {
   const reducer = ([children_ans_array,node]) => {
     let ans
     if (children_ans_array.length === 0) {
       const flm = node.get('file_last_modified')
       const size = node.get('file_size')
-      ans = v_derivated({
+      ans = v_derived({
         size,
         last_modified_max:flm,
         last_modified_list:List.of(flm),
@@ -296,14 +284,22 @@ export const computeDerivated = m => {
         nb_files:1,
       })
     } else {
-      ans = children_ans_array.reduce((acc,val)=>mergeDerivated(val,acc))
-      ans = afterMergeDerivated(ans)
+      ans = children_ans_array.reduce((acc,val)=>mergeDerived(val,acc))
+      ans = afterMergeDerived(ans)
       ans = sortChildren(children_ans_array,ans)
     }
     node = RecordUtil.compose(ans,node)
     return [ans, node]
   }
-  const [_,next_m] = reduceFfs(reducer,m)
+  let [_,next_m] = reduceFfs(reducer,m)
+
+  const diver = ([parent_ans,node]) => {
+    node = node.set('depth', parent_ans)
+    parent_ans = parent_ans + 1
+    return [parent_ans,node]
+  }
+  next_m = diveFfs(diver,0,next_m)
+
   return next_m
 }
 
@@ -314,21 +310,36 @@ export const computeDerivated = m => {
 
 
 
-
-
-
 export const toJs = a => {
-  a = a.map(a=>a.constructor.toJs(a))
+  const v_derived = RecordUtil.emptyFactory
+
+  const v_derived_file = RecordUtil.composeFactory(v_derived, v_file, v_folder)
+  const v_derived_folder = RecordUtil.composeFactory(v_derived, v_folder)
+  a = a.map(a => {
+    if (a.hasOwnProperty('file_size')) {
+      return v_derived_file.toJs(a)
+    } else {
+      return v_derived_folder.toJs(a)
+    }
+  })
   a = a.toObject()
   return a
 }
 
+export const fromJs = a => {
+  const v_derived = RecordUtil.emptyFactory
 
-
-
-
-
-
-const tags = () => {
-  return Map()
+  const v_derived_file = RecordUtil.composeFactory(v_derived, v_file, v_folder)
+  const v_derived_folder = RecordUtil.composeFactory(v_derived, v_folder)
+  a = Map(a)
+  a = a.map(a => {
+    if (a.hasOwnProperty('file_size')) {
+      return v_derived_file.fromJs(a)
+    } else {
+      return v_derived_folder.fromJs(a)
+    }
+  })
+  return a
 }
+
+

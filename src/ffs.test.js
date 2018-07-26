@@ -3,16 +3,31 @@ const should = chai.should()
 
 import * as Loop from 'test/loop'
 import * as Arbitrary from 'test/arbitrary'
-import * as M from 'compose-record'
+import * as M from 'ffs'
 
-describe('compose-record', function() {
+describe('ffs', function() {
 
   Loop.equal('(ffsInv . ffs) a', () => {
     const a = M.arbitraryOrigin()
     return [M.sortOrigin(M.ffsInv(M.ffs(a))), M.sortOrigin(a)]
   })
 
-  it('simple derivated data test', () => {
+  Loop.equal('(fromJs . toJs) a', () => {
+    const a = M.ffs(M.arbitraryOrigin())
+    return [M.fromJs(M.toJs(a)).toJS(), a.toJS()]
+  })
+
+  Loop.equal('(ffsInv . fromJs . toJs . ffs) a', () => {
+    const a = M.arbitraryOrigin()
+    return [M.sortOrigin(M.ffsInv(M.fromJs(M.toJs(M.ffs(a))))), M.sortOrigin(a)]
+  })
+
+  Loop.equal('(ffsInv . fromJs . toJs . computeDerived . ffs) a', () => {
+    const a = M.arbitraryOrigin()
+    return [M.sortOrigin(M.ffsInv(M.fromJs(M.toJs(M.computeDerived(M.ffs(a)))))), M.sortOrigin(a)]
+  })
+
+  it('simple derived data test', () => {
     const origin = [
       [{size:1,lastModified:5},'/a/b/c'],
       [{size:2,lastModified:4},'/a/b/d'],
@@ -21,7 +36,7 @@ describe('compose-record', function() {
       [{size:5,lastModified:1},'/h'],
     ]
     const data = M.ffs(origin)
-    const derivated = M.computeDerivated(data)
+    const derived = M.computeDerived(data)
 
     const test = (a,updater,predicates) => {
       Object.keys(updater).forEach(key=>a = a.update(key,updater[key]))
@@ -35,7 +50,7 @@ describe('compose-record', function() {
       sort_by_date_index:a=>a.toArray(),
     }
 
-    test(derivated.get(''), updater, {
+    test(derived.get(''), updater, {
       name:'',
       alias:'',
       comments:'',
@@ -52,7 +67,7 @@ describe('compose-record', function() {
       sort_by_date_index:[1,0],
     })
 
-    test(derivated.get('/h'), updater, {
+    test(derived.get('/h'), updater, {
       file_size:5,
       file_last_modified:1,
       name:'h',
@@ -71,7 +86,7 @@ describe('compose-record', function() {
       sort_by_date_index:[],
     })
 
-    test(derivated.get('/a'), updater, {
+    test(derived.get('/a'), updater, {
       name:'a',
       alias:'',
       comments:'',
@@ -88,7 +103,7 @@ describe('compose-record', function() {
       sort_by_date_index:[1,0],
     })
 
-    test(derivated.get('/a/b'), updater, {
+    test(derived.get('/a/b'), updater, {
       name:'b',
       alias:'',
       comments:'',
@@ -105,7 +120,7 @@ describe('compose-record', function() {
       sort_by_date_index:[1,0],
     })
 
-    test(derivated.get('/a/b/c'), updater, {
+    test(derived.get('/a/b/c'), updater, {
       name:'c',
       alias:'',
       comments:'',
@@ -122,7 +137,7 @@ describe('compose-record', function() {
       sort_by_date_index:[],
     })
 
-    test(derivated.get('/a/b/d'), updater, {
+    test(derived.get('/a/b/d'), updater, {
       name:'d',
       alias:'',
       comments:'',
@@ -139,7 +154,7 @@ describe('compose-record', function() {
       sort_by_date_index:[],
     })
 
-    test(derivated.get('/a/e'), updater, {
+    test(derived.get('/a/e'), updater, {
       name:'e',
       alias:'',
       comments:'',
@@ -156,7 +171,7 @@ describe('compose-record', function() {
       sort_by_date_index:[1,0],
     })
 
-    test(derivated.get('/a/e/f'), updater, {
+    test(derived.get('/a/e/f'), updater, {
       name:'f',
       alias:'',
       comments:'',
@@ -173,7 +188,7 @@ describe('compose-record', function() {
       sort_by_date_index:[],
     })
 
-    test(derivated.get('/a/e/g'), updater, {
+    test(derived.get('/a/e/g'), updater, {
       name:'g',
       alias:'',
       comments:'',

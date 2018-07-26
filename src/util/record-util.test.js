@@ -6,51 +6,52 @@ import * as Arbitrary from 'test/arbitrary'
 import * as M from 'util/record-util'
 
 describe('record-util', function() {
+  const testEquality = (a,b) => {
+    a.toObject().should.deep.equal(b.toObject())
+    a.constructor.toJs(a).should.deep.equal(b.constructor.toJs(b))
+    a.constructor.fromJs(a.constructor.toJs(a)).toObject().should.deep.equal(
+      b.constructor.fromJs(b.constructor.toJs(b)).toObject()
+    )
+  }
 
   it('compose : a . empty === empty . a', () => {
     const a = M.createFactory(
-      {
-        a:1,
-        b:2,
-      },
-      a=>{return {b:a.get('b')*2,baba:'first',z:0}},
-      a=>{return {b:a.b*2}}
-    )
+      {a:1,b:2,},
+      {toJs:a=>{a.b*=2;return a},fromJs:a=>{a.b*=2;return a}}
+    )()
+    const empty = M.emptyFactory()
 
-    const test = t => {
-      t.toObject().should.deep.equal({
-        a:1,
-        b:2,
-      })
-      t.constructor.fromJs(t.constructor.toJs(t)).toObject().should.deep.equal({
-        a:1,
-        b:8,
-      })
-    }
-
-    test(M.compose(a(),M.emptyFactory()))
-    test(M.compose(M.emptyFactory(),a()))
+    testEquality(M.compose(a,empty), a)
+    testEquality(M.compose(empty,a), a)
   })
 
 
   it('compose : a . (b . c) === (a . b) . c', () => {
     const a = M.createFactory(
-      {
-        a:1,
-        b:2,
-      },
-      a=>{return {b:a.get('b')*2,baba:'first',z:0}},
-      a=>{return {b:a.b*2}}
+      {a:1,b:2,},
+      {toJs:a=>{a.b*=2;return a},fromJs:a=>{a.b*=2;return a}}
+    )()
+    const b = M.createFactory(
+      {o:'tss',em:79,a:9},
+      {toJs:a=>a,fromJs:a=>a}
+    )()
+    const c = M.createFactory(
+      {t:0},
+      {toJs:a=>a,fromJs:a=>a}
+    )()
+
+    testEquality(M.compose(a, M.compose(b, c)), M.compose(M.compose(a, b), c))
+  })
+
+  it('simple test', () => {
+    const a = M.createFactory(
+      {a:1,b:2},
+      {toJs:a=>{a.b*=2;return a},fromJs:a=>{a.b*=2;return a}}
     )
 
     const b = M.createFactory(
-      {
-        a:10,
-        c:20,
-        d:30,
-      },
-      a=>{return {d:a.get('d')*2,baba:'second'}},
-      a=>{return {d:a.d*2}}
+      {a:10,c:20,d:30},
+      {toJs:a=>{a.d*=2;return a},fromJs:a=>{a.d*=2;return a}}
     )
     const c = M.compose(b(),a())
     
@@ -62,32 +63,32 @@ describe('record-util', function() {
     })
 
     c.constructor.toJs(c).should.deep.equal({
+      a:10,
       b:4,
+      c:20,
       d:60,
-      baba:'second',
-      z:0,
     })
 
-    // c.constructor.fromJs({
-    //   b:2,
-    //   d:30,
-    //   baba:'second',
-    //   z:0,
-    // }).toObject().should.deep.equal({
-    //   a:10,
-    //   b:4,
-    //   c:20,
-    //   d:60,
-    // })
+    c.constructor.fromJs({
+      a:10,
+      b:2,
+      c:20,
+      d:30,
+    }).toObject().should.deep.equal({
+      a:10,
+      b:4,
+      c:20,
+      d:60,
+    })
 
     c.constructor.fromJs({
       b:2,
-      d:30,
-      baba:'second',
+      d:40,
     }).toObject().should.deep.equal({
       a:10,
+      b:4,
       c:20,
-      d:60,
+      d:80,
     })
   })
 
