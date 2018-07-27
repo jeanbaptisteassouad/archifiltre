@@ -310,32 +310,46 @@ export const computeDerived = m => {
 
 
 
-export const toJs = a => {
-  const v_derived_file = RecordUtil.composeFactory(v_file, v_folder)
-  const v_derived_folder = v_folder
-  a = a.map(a => {
-    if (a.has('file_size')) {
-      return v_derived_file.toJs(a)
-    } else {
-      return v_derived_folder.toJs(a)
-    }
-  })
-  a = a.toObject()
-  return a
-}
 
-export const fromJs = a => {
-  const v_derived_file = RecordUtil.composeFactory(v_file, v_folder)
-  const v_derived_folder = v_folder
-  a = Map(a)
-  a = a.map(a => {
-    if (a.hasOwnProperty('file_size')) {
-      return v_derived_file.fromJs(a)
-    } else {
-      return v_derived_folder.fromJs(a)
-    }
-  })
-  return a
-}
 
+
+
+
+const toAndFromJs = (file,folder) => [
+  a => {
+    a = a.map(a => {
+      if (a.has('file_size')) {
+        return file.toJs(a)
+      } else {
+        return folder.toJs(a)
+      }
+    })
+    a = a.toObject()
+    return a
+  },
+  a => {
+    a = Map(a)
+    a = a.map(a => {
+      if (a.hasOwnProperty('file_size')) {
+        return file.fromJs(a)
+      } else {
+        return folder.fromJs(a)
+      }
+    })
+    return a
+  }
+]
+
+export const [toSaveJs,fromSaveJs] = toAndFromJs(
+  RecordUtil.composeFactory(v_file, v_folder),
+  v_folder
+)
+
+export const [toFullJs,fromFullJs] = toAndFromJs(
+  RecordUtil.composeFactory(
+    v_derived,
+    RecordUtil.composeFactory(v_file, v_folder)
+  ),
+  RecordUtil.composeFactory(v_derived, v_folder)
+)
 
