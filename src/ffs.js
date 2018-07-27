@@ -311,12 +311,10 @@ export const computeDerived = m => {
 
 
 export const toJs = a => {
-  const v_derived = RecordUtil.emptyFactory
-
-  const v_derived_file = RecordUtil.composeFactory(v_derived, v_file, v_folder)
-  const v_derived_folder = RecordUtil.composeFactory(v_derived, v_folder)
+  const v_derived_file = RecordUtil.composeFactory(v_file, v_folder)
+  const v_derived_folder = v_folder
   a = a.map(a => {
-    if (a.hasOwnProperty('file_size')) {
+    if (a.has('file_size')) {
       return v_derived_file.toJs(a)
     } else {
       return v_derived_folder.toJs(a)
@@ -327,10 +325,8 @@ export const toJs = a => {
 }
 
 export const fromJs = a => {
-  const v_derived = RecordUtil.emptyFactory
-
-  const v_derived_file = RecordUtil.composeFactory(v_derived, v_file, v_folder)
-  const v_derived_folder = RecordUtil.composeFactory(v_derived, v_folder)
+  const v_derived_file = RecordUtil.composeFactory(v_file, v_folder)
+  const v_derived_folder = v_folder
   a = Map(a)
   a = a.map(a => {
     if (a.hasOwnProperty('file_size')) {
