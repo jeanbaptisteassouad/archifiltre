@@ -269,6 +269,14 @@ const sortChildren = (children_ans_array,a) => {
 }
 
 export const computeDerived = m => {
+  m = m.map(a => {
+    if (a.has('file_size')) {
+      return RecordUtil.composeFactory(v_file, v_folder)(a)
+    } else {
+      return v_folder(a)
+    }
+  })
+
   const reducer = ([children_ans_array,node]) => {
     let ans
     if (children_ans_array.length === 0) {

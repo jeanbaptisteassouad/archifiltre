@@ -29,7 +29,7 @@ const v_derived = RecordUtil.createFactory({
 
 
 
-export const create = RecordUtil.compose(v_derived, v_tag)
+export const create = RecordUtil.composeFactory(v_derived, v_tag)
 
 const makeId = () => generateRandomString(40)
 
@@ -55,6 +55,7 @@ const insert = (id,tag,tags) => {
 export const push = (tag,tags) => tags.set(makeId(), tag)
 
 const computeDerived = (ffs,tags) => {
+  tags = tags.map(v_tag)
 
   const sortBySize = (ids) => {
     const compare = (a,b) => {
@@ -96,7 +97,9 @@ const computeDerived = (ffs,tags) => {
 
   tags = tags.map((tag) => {
     const ids = tag.get('ff_ids')
-    tag = tag.set('size', reduceToSize(filterChildren(sortBySize(ids))))
+    tag = RecordUtil.compose(v_derived({
+      size: reduceToSize(filterChildren(sortBySize(ids))),
+    }, tag))
 
     return tag
   })
