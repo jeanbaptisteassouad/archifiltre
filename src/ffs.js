@@ -133,11 +133,11 @@ export const ffs = a => {
   return a.map(mapper).reduce((acc,val)=>mergeFfs(val,acc), emptyFfs())
 }
 
-const emptyFfs = ()=>Map({
+export const emptyFfs = ()=>Map({
   '':v_folder(),
 })
 
-const mergeFfs = (a,b) => {
+export const mergeFfs = (a,b) => {
   const merger = (oldVal, newVal) => {
     oldVal = oldVal.update('children',b =>
       b.concat(newVal.get('children').filter(a=>b.includes(a)===false))
@@ -195,8 +195,13 @@ export const ffsInv = m => {
   return ans
 }
 
-
-
+export const arbitraryFfs = () => {
+  return ffs(arbitraryOrigin()).map(a=>{
+    a.set('alias',Arbitrary.string())
+    a.set('comments',Arbitrary.string())
+    return a
+  })
+}
 
 
 

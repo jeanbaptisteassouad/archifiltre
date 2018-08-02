@@ -1,3 +1,5 @@
+import * as Arbitrary from 'test/arbitrary'
+import * as Loop from 'test/loop'
 
 import { generateRandomString } from 'random-gen'
 import * as RecordUtil from 'util/record-util'
@@ -29,7 +31,7 @@ const v_derived = RecordUtil.createFactory({
 
 
 
-export const create = RecordUtil.composeFactory(v_derived, v_tag)
+export const create = v_tag
 
 const makeId = () => generateRandomString(40)
 
@@ -59,8 +61,8 @@ const computeDerived = (ffs,tags) => {
 
   const sortBySize = (ids) => {
     const compare = (a,b) => {
-      const s_a = ffs[a].get('size')
-      const s_b = ffs[b].get('size')
+      const s_a = ffs.get(a).get('size')
+      const s_b = ffs.get(b).get('size')
       if (s_a > s_b) {
         return -1
       } else if (s_a === s_b) {
@@ -75,7 +77,7 @@ const computeDerived = (ffs,tags) => {
 
   const filterChildren = (ids) => {
     const getAllChildren = (id) => {
-      const children = ffs[id].get('children')
+      const children = ffs.get(id).get('children')
       return children.concat(children.map(getAllChildren).reduce((acc,val)=>acc.concat(val),List()))
     }
 
@@ -87,19 +89,32 @@ const computeDerived = (ffs,tags) => {
 
       const tail = ids.slice(1)
       const filtered_tail = tail.filter(a=>children_head_id.includes(a)===false)
-      return List(head_id).concat(filterChildren(filtered_tail))
+
+      return List.of(head_id).concat(filterChildren(filtered_tail))
     }
   }
 
   const reduceToSize = (ids) => {
-    return ids.reduce((acc,val)=>acc+ffs[val].get('size'),0)
+    return ids.reduce((acc,val)=>acc+ffs.get(val).get('size'),0)
   }
 
   tags = tags.map((tag) => {
-    const ids = tag.get('ff_ids')
+    const ids = List(tag.get('ff_ids'))
+
+    // console.log('\n\nstart')
+    // let iii = ids
+    // console.log(1,iii)
+    // iii = sortBySize(iii)
+    // console.log(2,iii)
+    // iii = filterChildren(iii)
+    // console.log(3,iii)
+    // iii = reduceToSize(iii)
+    // console.log(4,iii)
+    // console.log('finish\n\n')
+
     tag = RecordUtil.compose(v_derived({
       size: reduceToSize(filterChildren(sortBySize(ids))),
-    }, tag))
+    }), tag)
 
     return tag
   })
@@ -109,6 +124,7 @@ const computeDerived = (ffs,tags) => {
 
 export const update = (ffs,tags) => {
   tags = tags.reduce((acc,val,id)=>insert(id,val,acc),empty())
+  tags = tags.filter((val)=>val.get('ff_ids').size !== 0)
   tags = computeDerived(ffs,tags)
 
   return tags
@@ -125,5 +141,7 @@ export const toSaveJs = a => {
 
 export const fromSaveJs = a => {
   a = Map(a)
-  a = a.map()
+  a = a.map(v_tag.toJs)
+
+  return a
 }

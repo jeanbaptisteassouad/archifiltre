@@ -13,8 +13,13 @@ describe('ffs', function() {
   })
 
   Loop.equal('(fromSaveJs . toSaveJs) a', () => {
-    const a = M.ffs(M.arbitraryOrigin())
+    const a = M.arbitraryFfs()
     return [M.fromSaveJs(M.toSaveJs(a)).toJS(), a.toJS()]
+  })
+
+  Loop.equal('(fromFullJs . toFullJs) a', () => {
+    const a = M.computeDerived(M.arbitraryFfs())
+    return [M.fromFullJs(M.toFullJs(a)).toJS(), a.toJS()]
   })
 
   Loop.equal('(ffsInv . fromSaveJs . toSaveJs . ffs) a', () => {
@@ -30,6 +35,18 @@ describe('ffs', function() {
   Loop.equal('(ffsInv . fromFullJs . toFullJs . computeDerived . ffs) a', () => {
     const a = M.arbitraryOrigin()
     return [M.sortOrigin(M.ffsInv(M.fromFullJs(M.toFullJs(M.computeDerived(M.ffs(a)))))), M.sortOrigin(a)]
+  })
+
+  Loop.equal('mergeFfs emptyFfs a === mergeFfs a emptyFfs', () => {
+    const a = M.arbitraryFfs()
+    return [M.mergeFfs(M.emptyFfs(),a).toJS(), M.mergeFfs(a,M.emptyFfs()).toJS()]
+  })
+
+  Loop.equal('mergeFfs (mergeFfs a b) c === mergeFfs a (mergeFfs b c)', () => {
+    const a = M.arbitraryFfs()
+    const b = M.arbitraryFfs()
+    const c = M.arbitraryFfs()
+    return [M.mergeFfs(M.mergeFfs(a,b),c).toJS(), M.mergeFfs(a,M.mergeFfs(b,c)).toJS()]
   })
 
   it('simple derived data test', () => {
