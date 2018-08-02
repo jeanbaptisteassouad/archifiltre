@@ -101,17 +101,6 @@ const computeDerived = (ffs,tags) => {
   tags = tags.map((tag) => {
     const ids = List(tag.get('ff_ids'))
 
-    // console.log('\n\nstart')
-    // let iii = ids
-    // console.log(1,iii)
-    // iii = sortBySize(iii)
-    // console.log(2,iii)
-    // iii = filterChildren(iii)
-    // console.log(3,iii)
-    // iii = reduceToSize(iii)
-    // console.log(4,iii)
-    // console.log('finish\n\n')
-
     tag = RecordUtil.compose(v_derived({
       size: reduceToSize(filterChildren(sortBySize(ids))),
     }), tag)
