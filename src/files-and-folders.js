@@ -75,11 +75,13 @@ export const sortOrigin = a => a.sort((a,b)=>{
 
 
 
-const v_folder = RecordUtil.createFactory({
+const fileOrFolderFactory = RecordUtil.createFactory({
   name:'',
   alias:'',
   comments:'',
   children:List(),
+  file_size:0,
+  file_last_modified:0,
 },{
   toJs: a => {
     a.children = a.children.toArray()
@@ -92,19 +94,7 @@ const v_folder = RecordUtil.createFactory({
 })
 
 
-
-
-const v_file = RecordUtil.createFactory({
-  file_size:0,
-  file_last_modified:0,
-},{
-  toJs: a => a,
-  fromJs: a => a,
-})
-
-
-
-export const ffs = a => {
+export const ff = a => {
   const mapper = ([file,path]) => {
     const names = path.split('/')
     const ids = names.map((name,i)=>names.slice(0,i+1).join('/'))
@@ -113,7 +103,7 @@ export const ffs = a => {
 
     const loop = ArrayUtil.zip([names,ids,childrens])
     loop.forEach(([name,id,children])=>{
-      m = m.set(id,v_folder({
+      m = m.set(id,fileOrFolderFactory({
         name,
         children,
       }))
@@ -121,23 +111,22 @@ export const ffs = a => {
 
     ids.slice(-1).forEach(id=>{
       m = m.update(id,a=>{
-        return RecordUtil.compose(v_file({
-          file_size:file.size,
-          file_last_modified:file.lastModified,
-        }),a)
+        a = a.set('file_size',file.size)
+        a = a.set('file_last_modified',file.lastModified)
+        return a
       })
     })
     return m
   }
 
-  return a.map(mapper).reduce((acc,val)=>mergeFfs(val,acc), emptyFfs())
+  return a.map(mapper).reduce((acc,val)=>mergeFf(val,acc), emptyFf())
 }
 
-export const emptyFfs = ()=>Map({
-  '':v_folder(),
+export const emptyFf = ()=>Map({
+  '':fileOrFolderFactory(),
 })
 
-export const mergeFfs = (a,b) => {
+export const mergeFf = (a,b) => {
   const merger = (oldVal, newVal) => {
     oldVal = oldVal.update('children',b =>
       b.concat(newVal.get('children').filter(a=>b.includes(a)===false))
@@ -147,7 +136,7 @@ export const mergeFfs = (a,b) => {
   return b.mergeWith(merger, a)
 }
 
-const reduceFfs = (reducer,m) => {
+const reduceFf = (reducer,m) => {
   const rec = (id) => {
     const node = m.get(id)
     const children_ans_array = node.get('children').toArray().map(rec)
@@ -159,7 +148,7 @@ const reduceFfs = (reducer,m) => {
   return [rec(''),m]
 }
 
-const diveFfs = (diver,first_ans,m) => {
+const diveFf = (diver,first_ans,m) => {
   const rec = (parent_ans,id) => {
     const node = m.get(id)
     const [ans,next_node] = diver([parent_ans,node])
@@ -171,7 +160,7 @@ const diveFfs = (diver,first_ans,m) => {
   return m
 }
 
-export const ffsInv = m => {
+export const ffInv = m => {
   const reducer = ([children_ans_array,node]) => {
     if (children_ans_array.length === 0) {
       const file = {
@@ -191,12 +180,12 @@ export const ffsInv = m => {
       return [ans, node]
     }
   }
-  const [ans,_] = reduceFfs(reducer,m)
+  const [ans,_] = reduceFf(reducer,m)
   return ans
 }
 
-export const arbitraryFfs = () => {
-  return ffs(arbitraryOrigin()).map(a=>{
+export const arbitraryFf = () => {
+  return ff(arbitraryOrigin()).map(a=>{
     a.set('alias',Arbitrary.string())
     a.set('comments',Arbitrary.string())
     return a
@@ -214,10 +203,7 @@ export const arbitraryFfs = () => {
 
 
 
-
-
-
-const v_derived = RecordUtil.createFactory({
+const derivedFactory = RecordUtil.createFactory({
   size:0,
   last_modified_max:0,
   last_modified_list:List(),
@@ -274,20 +260,14 @@ const sortChildren = (children_ans_array,a) => {
 }
 
 export const computeDerived = m => {
-  m = m.map(a => {
-    if (a.has('file_size')) {
-      return RecordUtil.composeFactory(v_file, v_folder)(a)
-    } else {
-      return v_folder(a)
-    }
-  })
+  m = m.map(fileOrFolderFactory)
 
   const reducer = ([children_ans_array,node]) => {
     let ans
     if (children_ans_array.length === 0) {
       const flm = node.get('file_last_modified')
       const size = node.get('file_size')
-      ans = v_derived({
+      ans = derivedFactory({
         size,
         last_modified_max:flm,
         last_modified_list:List.of(flm),
@@ -304,14 +284,14 @@ export const computeDerived = m => {
     node = RecordUtil.compose(ans,node)
     return [ans, node]
   }
-  let [_,next_m] = reduceFfs(reducer,m)
+  let [_,next_m] = reduceFf(reducer,m)
 
   const diver = ([parent_ans,node]) => {
     node = node.set('depth', parent_ans)
     parent_ans = parent_ans + 1
     return [parent_ans,node]
   }
-  next_m = diveFfs(diver,0,next_m)
+  next_m = diveFf(diver,0,next_m)
 
   return next_m
 }
@@ -328,41 +308,20 @@ export const computeDerived = m => {
 
 
 
-const toAndFromJs = (file,folder) => [
+const toAndFromJs = (factory) => [
   a => {
-    a = a.map(a => {
-      if (a.has('file_size')) {
-        return file.toJs(a)
-      } else {
-        return folder.toJs(a)
-      }
-    })
+    a = a.map(factory.toJs)
     a = a.toObject()
     return a
   },
   a => {
     a = Map(a)
-    a = a.map(a => {
-      if (a.hasOwnProperty('file_size')) {
-        return file.fromJs(a)
-      } else {
-        return folder.fromJs(a)
-      }
-    })
+    a = a.map(factory.fromJs)
     return a
   }
 ]
 
-export const [toSaveJs,fromSaveJs] = toAndFromJs(
-  RecordUtil.composeFactory(v_file, v_folder),
-  v_folder
-)
-
-export const [toFullJs,fromFullJs] = toAndFromJs(
-  RecordUtil.composeFactory(
-    v_derived,
-    RecordUtil.composeFactory(v_file, v_folder)
-  ),
-  RecordUtil.composeFactory(v_derived, v_folder)
+export const [toJs,fromJs] = toAndFromJs(
+  RecordUtil.composeFactory(derivedFactory, fileOrFolderFactory)
 )
 

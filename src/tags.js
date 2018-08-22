@@ -6,7 +6,7 @@ import * as RecordUtil from 'util/record-util'
 
 import { List, Map, Set } from 'immutable'
 
-const v_tag = RecordUtil.createFactory({
+const tagFactory = RecordUtil.createFactory({
   name:'',
   ff_ids:Set(),
 },{
@@ -21,7 +21,7 @@ const v_tag = RecordUtil.createFactory({
 })
 
 
-const v_derived = RecordUtil.createFactory({
+const derivedFactory = RecordUtil.createFactory({
   size:0,
 },{
   toJs: a => a,
@@ -31,7 +31,7 @@ const v_derived = RecordUtil.createFactory({
 
 
 
-export const create = v_tag
+export const create = tagFactory
 
 const makeId = () => generateRandomString(40)
 
@@ -57,7 +57,7 @@ const insert = (id,tag,tags) => {
 export const push = (tag,tags) => tags.set(makeId(), tag)
 
 const computeDerived = (ffs,tags) => {
-  tags = tags.map(v_tag)
+  tags = tags.map(tagFactory)
 
   const sortBySize = (ids) => {
     const compare = (a,b) => {
@@ -101,7 +101,7 @@ const computeDerived = (ffs,tags) => {
   tags = tags.map((tag) => {
     const ids = List(tag.get('ff_ids'))
 
-    tag = RecordUtil.compose(v_derived({
+    tag = RecordUtil.compose(derivedFactory({
       size: reduceToSize(filterChildren(sortBySize(ids))),
     }), tag)
 
@@ -121,16 +121,22 @@ export const update = (ffs,tags) => {
 
 
 
-export const toSaveJs = a => {
-  a = a.map(v_tag.toJs)
-  a = a.toObject()
+const toAndFromJs = (factory) => [
+  a => {
+    a = a.map(factory.toJs)
+    a = a.toObject()
 
-  return a
-}
+    return a
+  },
+  a => {
+    a = Map(a)
+    a = a.map(factory.fromJs)
 
-export const fromSaveJs = a => {
-  a = Map(a)
-  a = a.map(v_tag.toJs)
+    return a
+  }
+]
 
-  return a
-}
+export const [toJs,fromJs] = toAndFromJs(
+  tagFactory
+)
+

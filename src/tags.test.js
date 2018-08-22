@@ -4,7 +4,7 @@ const expect = chai.expect
 
 import * as Loop from 'test/loop'
 import * as Arbitrary from 'test/arbitrary'
-import * as Ffs from 'ffs'
+import * as FilesAndFolders from 'files-and-folders'
 import * as M from 'tags'
 
 import { Set } from 'immutable'
@@ -12,13 +12,8 @@ import { Set } from 'immutable'
 
 describe('tags', function() {
 
-  // Loop.equal('(ffsInv . ffs) a', () => {
-  //   const a = M.arbitraryOrigin()
-  //   return [M.sortOrigin(M.ffsInv(M.ffs(a))), M.sortOrigin(a)]
-  // })
-
   it('simple derived data test', () => {
-    const ffs = Ffs.computeDerived(Ffs.ffs([
+    const ff = FilesAndFolders.computeDerived(FilesAndFolders.ff([
       [{size:1,lastModified:0},'/a/b/c'],
       [{size:2,lastModified:0},'/a/b/d'],
       [{size:3,lastModified:0},'/a/e'],
@@ -26,12 +21,14 @@ describe('tags', function() {
     ]))
 
     let tags = M.empty()
+    tags = M.update(ff,tags)
+    
     tags = M.push(M.create({name:'T',ff_ids:Set.of('/a/b','/a/b/d')}),tags)
     tags = M.push(M.create({name:'U',ff_ids:Set.of('/a/e','/a/b/d')}),tags)
     tags = M.push(M.create({name:'T',ff_ids:Set.of('/a/f/g')}),tags)
     tags = M.push(M.create({name:'V',ff_ids:Set()}),tags)
 
-    tags = M.update(ffs,tags)
+    tags = M.update(ff,tags)
 
     const test = (a,updater,predicates) => {
       Object.keys(updater).forEach(key=>a = a.update(key,updater[key]))
