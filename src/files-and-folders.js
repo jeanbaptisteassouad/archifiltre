@@ -7,70 +7,9 @@ import * as RecordUtil from 'util/record-util'
 
 import * as ObjectUtil from 'util/object-util'
 
+import * as Origin from 'origin'
+
 import { List, Map, Set } from 'immutable'
-
-
-
-const arbitraryMockFile = () => {
-  return {
-    size:Arbitrary.natural(),
-    lastModified:Arbitrary.natural(),
-  }
-}
-
-const arbitraryPath = () => {
-  const index = () => Arbitrary.index()+1
-  const value = () => Math.floor(Math.random()*5)
-  return '/'+Arbitrary.arrayWithIndex(index)(value).join('/')
-}
-
-export const arbitraryOrigin = () => {
-  const index = () => Arbitrary.index()+1
-  const a = Arbitrary.arrayWithIndex(index)(() => {
-    return [arbitraryMockFile(), arbitraryPath()]
-  })
-
-  const compare = (a,b) => {
-    if (a.length < b.length) {
-      return a === b.slice(0,a.length)
-    } else {
-      return b === a.slice(0,b.length)
-    }
-  }
-
-  return a.reduce((acc,val) => {
-    const shouldAdd = acc.reduce((bool,val2) => bool && !compare(val2[1], val[1]), true)
-    if (shouldAdd) {
-      return acc.concat([val])
-    } else {
-      return acc
-    }
-  }, [])
-}
-
-export const sortOrigin = a => a.sort((a,b)=>{
-  a = a[1]
-  b = b[1]
-  if (a < b) {
-    return -1
-  } else if (a === b) {
-    return 0
-  } else {
-    return 1
-  }
-})
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -119,14 +58,14 @@ export const ff = a => {
     return m
   }
 
-  return a.map(mapper).reduce((acc,val)=>mergeFf(val,acc), emptyFf())
+  return a.map(mapper).reduce((acc,val)=>merge(val,acc), empty())
 }
 
-export const emptyFf = ()=>Map({
+export const empty = ()=>Map({
   '':fileOrFolderFactory(),
 })
 
-export const mergeFf = (a,b) => {
+export const merge = (a,b) => {
   const merger = (oldVal, newVal) => {
     oldVal = oldVal.update('children',b =>
       b.concat(newVal.get('children').filter(a=>b.includes(a)===false))
@@ -136,7 +75,7 @@ export const mergeFf = (a,b) => {
   return b.mergeWith(merger, a)
 }
 
-const reduceFf = (reducer,m) => {
+const reduce = (reducer,m) => {
   const rec = (id) => {
     const node = m.get(id)
     const children_ans_array = node.get('children').toArray().map(rec)
@@ -148,7 +87,7 @@ const reduceFf = (reducer,m) => {
   return [rec(''),m]
 }
 
-const diveFf = (diver,first_ans,m) => {
+const dive = (diver,first_ans,m) => {
   const rec = (parent_ans,id) => {
     const node = m.get(id)
     const [ans,next_node] = diver([parent_ans,node])
@@ -180,12 +119,12 @@ export const ffInv = m => {
       return [ans, node]
     }
   }
-  const [ans,_] = reduceFf(reducer,m)
+  const [ans,_] = reduce(reducer,m)
   return ans
 }
 
-export const arbitraryFf = () => {
-  return ff(arbitraryOrigin()).map(a=>{
+export const arbitrary = () => {
+  return ff(Origin.arbitrary()).map(a=>{
     a.set('alias',Arbitrary.string())
     a.set('comments',Arbitrary.string())
     return a
@@ -284,14 +223,14 @@ export const computeDerived = m => {
     node = RecordUtil.compose(ans,node)
     return [ans, node]
   }
-  let [_,next_m] = reduceFf(reducer,m)
+  let [_,next_m] = reduce(reducer,m)
 
   const diver = ([parent_ans,node]) => {
     node = node.set('depth', parent_ans)
     parent_ans = parent_ans + 1
     return [parent_ans,node]
   }
-  next_m = diveFf(diver,0,next_m)
+  next_m = dive(diver,0,next_m)
 
   return next_m
 }
