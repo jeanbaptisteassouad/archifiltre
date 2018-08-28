@@ -1,8 +1,7 @@
 
 import duck from 'reducers/duck'
-import { Record } from 'immutable'
 
-const type = 'cheapExp/appState'
+import { Record } from 'immutable'
 
 
 const State = Record({
@@ -10,31 +9,31 @@ const State = Record({
   finish:false,
 })
 
+const initial_state = new State()
 
-function bundle(state) {
-  return {
-    isStarted: () => state.get('start'),
-    isFinished: () => state.get('finish')
-  }
+const reader = {
+  isStarted: () => state => state.get('start'),
+  isFinished: () => state => state.get('finish'),
 }
 
-const initialState = new State()
-
-const { mkA, reducer } = duck(type, initialState, bundle)
-
-export default reducer
-
-export const startToLoadFiles = mkA(() => state => {
+const startToLoadFiles = () => state => {
   console.time('loaded')
   state = state.update('start', () => true) 
   state = state.update('finish', () => false) 
   return state
-})
-export const finishedToLoadFiles = mkA(() => state => {
+}
+
+const finishedToLoadFiles = () => state => {
   console.timeEnd('loaded')
   state = state.update('start', () => true) 
   state = state.update('finish', () => true) 
   return state
-})
+}
 
-export const reInit = mkA(() => state => initialState)
+const writer = {
+  startToLoadFiles,
+  finishedToLoadFiles,
+}
+
+export default duck('app_state',initial_state,reader,writer)
+
