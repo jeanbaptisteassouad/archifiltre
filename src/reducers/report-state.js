@@ -1,6 +1,6 @@
 
-import duck from 'reducers/duck'
 import { Record } from 'immutable'
+import * as RealEstate from 'reducers/real-estate'
 
 const State = Record({
   editing_tags:false,
@@ -8,7 +8,9 @@ const State = Record({
   candidate_comments:''
 })
 
-const initial_state = new State()
+const property_name = 'report_state'
+
+const initialState = () => new State()
 
 const reader = {
   editing_tags: () => state => state.get('editing_tags'),
@@ -50,4 +52,9 @@ const writer = {
   setCandidateComments,
 }
 
-export default duck('report-state',initial_state,reader,writer)
+export default RealEstate.create({
+  property_name,
+  initialState,
+  reader,
+  writer,
+})

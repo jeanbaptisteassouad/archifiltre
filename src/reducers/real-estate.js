@@ -30,15 +30,10 @@ export const create = (state) => {
   const reader = {}
   for (let key in state.reader) {
     updateGetAndSet(get,set,property_name,key,state.reader,reader)
-    // reader[property_name+'|'+key] = (...args) => state.reader[key](...args)
-    // reader[property_name+'|'+key].get = [get]
   }
   const writer = {}
   for (let key in state.writer) {
     updateGetAndSet(get,set,property_name,key,state.writer,writer)
-    // writer[property_name+'|'+key] = (...args) => state.writer[key](...args)
-    // writer[property_name+'|'+key].get = [get]
-    // writer[property_name+'|'+key].set = [set]
   }
 
   return {
@@ -48,11 +43,6 @@ export const create = (state) => {
   }
 }
 
-// reader[property_name+'|'+key] = (...args) => state.reader[key](...args)
-// reader[property_name+'|'+key].get = [get]
-
-// reader[key] = (...args) => real_estate.reader[key](...args)
-// reader[key].get = [higher_order.get].concat(real_estate.reader[key].get)
 
 const updateGetAndSet = (get,set,property_name,old_key,old_obj,new_obj) => {
   let new_key = old_key
@@ -152,17 +142,12 @@ export const createHigherOrder = (higher_order) => {
   return (real_estate) => {
     const initialState = () => higher_order.initialState(real_estate.initialState({}))
     const reader = {}
-    for (key in real_estate.reader) {
+    for (let key in real_estate.reader) {
       updateGetAndSet(get,set,property_name,key,real_estate.reader,reader)
-      // reader[key] = (...args) => real_estate.reader[key](...args)
-      // reader[key].get = [higher_order.get].concat(real_estate.reader[key].get)
     }
     const writer = {}
-    for (key in real_estate.writer) {
+    for (let key in real_estate.writer) {
       updateGetAndSet(get,set,property_name,key,real_estate.writer,writer)
-      // writer[key] = (...args) => real_estate.writer[key](...args)
-      // writer[key].get = [higher_order.get].concat(real_estate.writer[key].get)
-      // writer[key].set = [higher_order.set].concat(real_estate.writer[key].set)
     }
     return create({
       property_name,

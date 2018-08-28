@@ -4,7 +4,7 @@ import React from 'react'
 
 import * as ObjectUtil from 'util/object-util'
 
-export default function duck(props_name,initial_state,reader,writer) {
+export default function(compiled_real_estate) {
 
   return function(NextComponent) {
 

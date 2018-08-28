@@ -1,12 +1,14 @@
 
-import duck from 'reducers/duck'
 import { Record } from 'immutable'
+import * as RealEstate from 'reducers/real-estate'
 
 const State = Record({
   tag_being_edited: '',
 })
 
-const initial_state = new State()
+const property_name = 'tag_list_state'
+
+const initialState = () => new State()
 
 const reader = {
   tag_being_edited: () => state => state.get('tag_being_edited'),
@@ -27,5 +29,9 @@ const writer = {
   setNoTagBeingEdited,
 }
 
-export default duck('tag-list-state',initial_state,reader,writer)
-
+export default RealEstate.create({
+  property_name,
+  initialState,
+  reader,
+  writer,
+})
