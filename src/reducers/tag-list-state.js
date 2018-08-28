@@ -24,9 +24,12 @@ const setNoTagBeingEdited = () => state => {
   return state
 }
 
+const reInit = () => state => initialState()
+
 const writer = {
   setTagBeingEdited,
   setNoTagBeingEdited,
+  reInit,
 }
 
 export default RealEstate.create({

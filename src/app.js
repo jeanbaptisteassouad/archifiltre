@@ -12,13 +12,10 @@ import 'css/app.css'
 
 import { generateRandomString } from 'random-gen'
 
-import appState from 'reducers/app-state'
-import icicleState from 'reducers/icicle-state'
-import reportState from 'reducers/report-state'
-import tagListState from 'reducers/tag-list-state'
+import store from 'reducers/store'
 
 
-const Baba = tagListState(reportState(icicleState(appState((props) => {
+const Store = store((props) => {
   console.log(props)
   window.props = props
   return (
@@ -26,7 +23,7 @@ const Baba = tagListState(reportState(icicleState(appState((props) => {
       tucetsauicertcuiaretcuitecuitrecui tuic ecuier tcuietcuiaretcuiacetauicuitaecautricetraui
     </div>
   )
-}))))
+})
 
 const app = () => {
   let root_div = document.createElement('div')
@@ -38,7 +35,7 @@ const app = () => {
 
 
   ReactDOM.render(
-    <Baba/>,
+    <Store/>,
     root_div
   )
 

@@ -87,6 +87,8 @@ const toggleChangeSkin = () => state => {
   return state
 }
 
+const reInit = () => state => initialState()
+
 const writer = {
   setFocus,
   setNoFocus,
@@ -97,6 +99,7 @@ const writer = {
   setTagToHighlight,
   setNoTagToHighlight,
   toggleChangeSkin,
+  reInit,
 }
 
 export default RealEstate.create({
