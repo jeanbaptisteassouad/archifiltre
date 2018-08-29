@@ -1,7 +1,7 @@
 
 import * as RecordUtil from 'util/record-util'
-import * as FilesAndFolders from 'files-and-folders'
-import * as Tags from 'tags'
+import * as FilesAndFolders from 'datastore/files-and-folders'
+import * as Tags from 'datastore/tags'
 
 const virtualFileSystem = RecordUtil.createFactory({
   session_name:'Untitled',

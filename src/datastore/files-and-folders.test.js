@@ -3,8 +3,8 @@ const should = chai.should()
 
 import * as Loop from 'test/loop'
 import * as Arbitrary from 'test/arbitrary'
-import * as M from 'files-and-folders'
-import * as Origin from 'origin'
+import * as M from 'datastore/files-and-folders'
+import * as Origin from 'datastore/origin'
 
 describe('files-and-folders', function() {
 

@@ -4,8 +4,8 @@ const expect = chai.expect
 
 import * as Loop from 'test/loop'
 import * as Arbitrary from 'test/arbitrary'
-import * as FilesAndFolders from 'files-and-folders'
-import * as M from 'tags'
+import * as FilesAndFolders from 'datastore/files-and-folders'
+import * as M from 'datastore/tags'
 
 import { Set } from 'immutable'
 

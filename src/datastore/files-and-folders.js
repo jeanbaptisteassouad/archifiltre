@@ -7,7 +7,7 @@ import * as RecordUtil from 'util/record-util'
 
 import * as ObjectUtil from 'util/object-util'
 
-import * as Origin from 'origin'
+import * as Origin from 'datastore/origin'
 
 import { List, Map, Set } from 'immutable'
 

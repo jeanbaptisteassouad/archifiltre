@@ -20,14 +20,14 @@ const recTraverseFileTree = (path) => {
 const cdDotDot = path => path.split('/').slice(0,-1).join('/')
 
 
-export const traverseFileTree = (droped_folder_path) => {
-  let origin = recTraverseFileTree(droped_folder_path)
-  droped_folder_path = cdDotDot(droped_folder_path)
-  origin = origin.map(([file,path])=>[file,path.slice(droped_folder_path.length)])
-  return [droped_folder_path,origin]
+const traverseFileTree = (dropped_folder_path) => {
+  let origin = recTraverseFileTree(dropped_folder_path)
+  dropped_folder_path = cdDotDot(dropped_folder_path)
+  origin = origin.map(([file,path])=>[file,path.slice(dropped_folder_path.length)])
+  return [dropped_folder_path,origin]
 }
 
-
+export default traverseFileTree
 
 
 

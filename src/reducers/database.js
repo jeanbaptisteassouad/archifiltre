@@ -4,7 +4,9 @@ import * as RealEstate from 'reducers/real-estate'
 
 
 
-
+const (dropped_folder_path) => state => {
+  
+}
 
 
 
