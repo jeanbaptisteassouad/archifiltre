@@ -43,7 +43,7 @@ export default class FolderDropzone extends React.Component {
   handleDrop (e) {
     e.preventDefault()
     // this.props.startToLoadFiles()
-    console.log(e)
+    console.log(e.dataTransfer.files[0].path,Folder.traverseFileTree(e.dataTransfer.files[0].path))
     // Folder.asyncHandleDrop(e,this.props.push,this.props.fromJson,this.props.fromLegacyCsv)
     //   .then(shouldProcess => {
     //     if (shouldProcess) {
