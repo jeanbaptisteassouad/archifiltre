@@ -17,12 +17,13 @@ const arrow_style = {
 class CtrlZ extends React.Component {
   constructor(props) {
     super(props)
+
     this.onKeyDownHandler = e => {
       if (e.ctrlKey === true) {
         if (e.key === 'z') {
-          this.props.undo()
+          this.props.api.undo.undo()
         } else if (e.key === 'Z') {
-          this.props.redo()
+          this.props.api.undo.redo()
         }
       }
     }
@@ -37,15 +38,6 @@ class CtrlZ extends React.Component {
   }
 
   render() {
-  // return {
-  //   hasAPast: hasAPast(state),
-  //   hasAFuture: hasAFuture(state)
-  // }
-
-  // return {
-  //   undo: () => dispatch(undo()),
-  //   redo: () => dispatch(redo())
-  // }
   
     if (this.props.visible) {
       return (
@@ -53,9 +45,9 @@ class CtrlZ extends React.Component {
             <div className='cell small-6'>
               {
                 mkRB(
-                  this.props.undo,
+                  this.props.api.undo.undo,
                   (<i className="fi-arrow-left" style={arrow_style}/>),
-                  this.props.hasAPast,
+                  this.props.api.undo.hasAPast,
                   '',
                   {marginBottom: '0'}
                 )
@@ -64,9 +56,9 @@ class CtrlZ extends React.Component {
             <div className='cell small-6'>
               {
                 mkRB(
-                  this.props.redo,
+                  this.props.api.undo.redo,
                   (<i className="fi-arrow-right" style={arrow_style}/>),
-                  this.props.hasAFuture,
+                  this.props.api.undo.hasAFuture,
                   '',
                   {marginBottom: '0'}
                 )

@@ -16,7 +16,7 @@ const grid_style = {
   padding: '0em 5em',
 }
 
-export default MainSpace = props => {
+const MainSpace = props => {
   // const app_state = selectAppState(state)
   // const icicle_state = selectIcicleState(state)
 
@@ -26,8 +26,15 @@ export default MainSpace = props => {
   //   change_skin: icicle_state.changeSkin(),
   // }
 
+  const api = props.api
+  const app_state = api.app_state
+  const icicle_state = api.icicle_state
 
-  if (props.started === false && props.finished === false) {
+  const started = app_state.isStarted()
+  const finished = app_state.isFinished()
+  const change_skin = icicle_state.changeSkin()
+
+  if (started === false && finished === false) {
     return (
       <div className='grid-y grid-padding-x grid-frame align-center' style={grid_style}>
         <div className='cell small-8'>
@@ -36,7 +43,7 @@ export default MainSpace = props => {
       </div>
     )
   }
-  // } else if (props.started === true && props.finished === false) {
+  // } else if (started === true && finished === false) {
   //   return (
   //     <div className='grid-y grid-padding-x grid-frame align-center'>
   //       <div className='cell small-8'>
@@ -48,11 +55,12 @@ export default MainSpace = props => {
   //   return (
   //     <div className='grid-y grid-padding-x grid-frame align-center'>
   //       <div className='cell small-12'>
-  //         {props.change_skin === false && <WorkSpace/>}
-  //         {props.change_skin === true && <WorkSpaceTime/>}
+  //         {change_skin === false && <WorkSpace/>}
+  //         {change_skin === true && <WorkSpaceTime/>}
   //       </div>
   //     </div>
   //   )
   // }
 }
 
+export default MainSpace

@@ -3,8 +3,8 @@ import React from 'react'
 
 import ReactDOM from 'react-dom'
 
-// import MainSpace from 'components/main-space'
-// import Header from 'components/header'
+import MainSpace from 'components/main-space'
+import Header from 'components/header'
 
 import 'css/app.css'
 
@@ -19,8 +19,13 @@ const Store = store((props) => {
   console.log(props)
   window.props = props
   return (
-    <div>
-      tucetsauicertcuiaretcuitecuitrecui tuic ecuier tcuietcuiaretcuiacetauicuitaecautricetraui
+    <div className='grid-y grid-frame'>
+      <div className='cell'>
+        <Header api={props.api}/>
+      </div>
+      <div className='cell auto'>
+        <MainSpace api={props.api}/>
+      </div>
     </div>
   )
 })

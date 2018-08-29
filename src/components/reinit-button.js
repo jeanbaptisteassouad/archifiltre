@@ -12,7 +12,19 @@ import { mkB } from 'components/button'
 
 import { tr } from 'dict'
 
-export default ReinitButton = props => {
+const ReinitButton = props => {
+  const api = props.api
+  const database = api.database
+  const app_state = api.app_state
+  const icicle_state = api.icicle_state
+  const undo = api.undo
+  const reInitStateApp = () => {
+    database.reInit()
+    app_state.reInit()
+    icicle_state.setNoFocus()
+    icicle_state.setNoDisplayRoot()
+    undo.commit()
+  }
     // reInitStateApp: (...args) => {
     //   dispatch(re1())
     //   dispatch(re2())
@@ -21,6 +33,7 @@ export default ReinitButton = props => {
     //   dispatch(commit())
     // }
 
-  return mkB(props.reInitStateApp, tr("Close"), true, "#e04d1c")
+  return mkB(reInitStateApp, tr("Close"), true, "#e04d1c")
 }
 
+export default ReinitButton

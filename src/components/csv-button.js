@@ -10,20 +10,25 @@ import { save, makeNameWithExt } from 'save'
 import { tr } from 'dict'
 
 
-export default CsvButton = props => {
+const CsvButton = props => {
   // let database = selectDatabase(state)
   // return {
   //   getStrList2: database.toStrList2,
   //   getSessionName: database.getSessionName,
   // }
+  const api = props.api
+  const database = api.database
+  const getStrList2 = database.getStrList2
+  const getSessionName = database.gatSessionName
 
-  const name = () => makeNameWithExt(props.getSessionName(),'csv')
+  const name = () => makeNameWithExt(getSessionName(),'csv')
   return mkB(
     ()=>{
       console.log('to csv')
-      save(name(), Csv.toStr(props.getStrList2()))
+      save(name(), Csv.toStr(getStrList2()))
     },
     tr('Export'),
     true)
 }
 
+export default CsvButton

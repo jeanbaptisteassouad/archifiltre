@@ -9,20 +9,26 @@ import { save, makeNameWithExt } from 'save'
 import { tr } from 'dict'
 
 
-export default SaveButton = props => {
-  let database = selectDatabase(state)
+const SaveButton = props => {
+  // let database = selectDatabase(state)
   // return {
   //   getJson: database.toJson,
   //   getSessionName: database.getSessionName,
   // }
+  const api = props.api
+  const database = api.database
+  const getJson = database.getJson
+  const getSessionName = database.gatSessionName
 
 
-  const name = () => makeNameWithExt(props.getSessionName(),'json')
+  const name = () => makeNameWithExt(getSessionName(),'json')
   return mkB(
     ()=>{
-      save(name(), props.getJson())
+      save(name(), getJson())
     },
     tr('Save'),
     true
   )
 }
+
+export default SaveButton

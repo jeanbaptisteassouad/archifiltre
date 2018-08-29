@@ -10,6 +10,7 @@ import TextAlignCenter from 'components/text-align-center'
 
 import { tr } from 'dict'
 
+
 export default class FolderDropzone extends React.Component {
   constructor(props) {
     super(props)
@@ -41,14 +42,15 @@ export default class FolderDropzone extends React.Component {
 
   handleDrop (e) {
     e.preventDefault()
-    this.props.startToLoadFiles()
-    Folder.asyncHandleDrop(e,this.props.push,this.props.fromJson,this.props.fromLegacyCsv)
-      .then(shouldProcess => {
-        if (shouldProcess) {
-          return this.props.makeTree()
-        }
-      })
-      .then(this.props.finishedToLoadFiles)
+    // this.props.startToLoadFiles()
+    console.log(e)
+    // Folder.asyncHandleDrop(e,this.props.push,this.props.fromJson,this.props.fromLegacyCsv)
+    //   .then(shouldProcess => {
+    //     if (shouldProcess) {
+    //       return this.props.makeTree()
+    //     }
+    //   })
+    //   .then(this.props.finishedToLoadFiles)
   }
 
   render() {
