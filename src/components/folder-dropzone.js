@@ -1,7 +1,7 @@
 import React from 'react'
 // import { connect } from 'react-redux'
 
-import * as Folder from 'folder'
+import * as TraverseFileTree from 'traverse-file-tree'
 // import { push, fromJson, makeTree, fromLegacyCsv, workerPush, workerMakeTree } from 'reducers/database'
 // import { startToLoadFiles, finishedToLoadFiles } from 'reducers/app-state'
 // import { commit } from 'reducers/root-reducer'
@@ -43,8 +43,8 @@ export default class FolderDropzone extends React.Component {
   handleDrop (e) {
     e.preventDefault()
     // this.props.startToLoadFiles()
-    console.log(e.dataTransfer.files[0].path,Folder.traverseFileTree(e.dataTransfer.files[0].path))
-    // Folder.asyncHandleDrop(e,this.props.push,this.props.fromJson,this.props.fromLegacyCsv)
+    console.log(e.dataTransfer.files[0].path,TraverseFileTree.traverseFileTree(e.dataTransfer.files[0].path))
+    // TraverseFileTree.asyncHandleDrop(e,this.props.push,this.props.fromJson,this.props.fromLegacyCsv)
     //   .then(shouldProcess => {
     //     if (shouldProcess) {
     //       return this.props.makeTree()

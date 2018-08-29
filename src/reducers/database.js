@@ -1,4 +1,25 @@
 
+import * as RealEstate from 'reducers/real-estate'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import duck from 'reducers/duck'
 import * as Content from 'content'

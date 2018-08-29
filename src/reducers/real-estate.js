@@ -136,11 +136,10 @@ export const compile = (real_estate) => {
 }
 
 export const createHigherOrder = (higher_order) => {
-  const property_name = higher_order.property_name
   const get = higher_order.get
   const set = higher_order.set
 
-  return (real_estate) => {
+  return (property_name,real_estate) => {
     const initialState = () => higher_order.initialState(real_estate.initialState({}))
     const reader = {}
     for (let key in real_estate.reader) {
