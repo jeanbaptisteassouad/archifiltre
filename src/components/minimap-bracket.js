@@ -1,7 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
 
-import { selectDatabase, selectIcicleState } from 'reducers/root-reducer'
 
 class Presentational extends React.PureComponent {
   constructor(props) {

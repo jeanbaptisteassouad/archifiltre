@@ -1,7 +1,7 @@
 import React from 'react'
-import { connect } from 'react-redux'
+// import { connect } from 'react-redux'
 
-import { selectDatabase } from 'reducers/root-reducer'
+// import { selectDatabase } from 'reducers/root-reducer'
 
 import { tr } from 'dict'
 
@@ -10,6 +10,15 @@ const cell_style = {
   textAlign:'center'
 }
 
+
+export default (props) => {
+  const api = props.api
+  .....
+  const nb_files = ......getWaitingCounter()
+  return (
+    <Presentational {...props} nb_files={nb_files}/>
+  )
+}
 
 class Presentational extends React.Component {
   constructor(props) {
@@ -47,21 +56,21 @@ class Presentational extends React.Component {
 }
 
 
-const mapStateToProps = state => {
-  let database = selectDatabase(state)
-  return {
-    nb_files: database.getWaitingCounter(),
-  }
-}
+// const mapStateToProps = state => {
+//   let database = selectDatabase(state)
+//   return {
+//     nb_files: database.getWaitingCounter(),
+//   }
+// }
 
-const mapDispatchToProps = dispatch => {
-  return {}
-}
+// const mapDispatchToProps = dispatch => {
+//   return {}
+// }
 
 
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
+// const Container = connect(
+//   mapStateToProps,
+//   mapDispatchToProps
+// )(Presentational)
 
-export default Container
+// export default Container

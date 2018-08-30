@@ -1,7 +1,4 @@
 import React from 'react'
-import { connect } from 'react-redux'
-
-import { selectIcicleState, selectDatabase } from 'reducers/root-reducer'
 
 import BreadCrumbText from 'components/breadcrumb-text'
 import BreadCrumbPoly from 'components/breadcrumb-poly'
@@ -211,34 +208,28 @@ class Presentational extends React.PureComponent {
 
 }
 
-const mapStateToProps = state => {
-  let icicle_state = selectIcicleState(state)
-  let database = selectDatabase(state)
 
-  let breadcrumb_sequence = icicle_state.isLocked() ? icicle_state.lock_sequence() : icicle_state.hover_sequence()
-  
-  const getByID = database.getByID
-  const max_depth = database.maxDepth()
+export default (props) => {
+  const api = props.api
+  const icicle_state = api.icicle_state
 
+  let breadcrumb_sequence
+  if (icicle_state.isLocked()) {
+    breadcrumb_sequence = icicle_state.lock_sequence()
+  } else {
+    breadcrumb_sequence = icicle_state.hover_sequence()
+  }
 
+  // const getByID = database.getByID
+  // const max_depth = database.maxDepth()
 
-  return {
+  props = ObjectUtil.compose({
     breadcrumb_sequence,
     isFocused: icicle_state.isFocused(),
     max_depth,
     getByID,
     root_id: database.rootId(),
-  }
+  },props)
+
+  return (<Presentational {...props}/>)
 }
-
-const mapDispatchToProps = dispatch => {
-  return {}
-}
-
-
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
-
-export default Container

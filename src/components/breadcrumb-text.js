@@ -1,5 +1,4 @@
 import React from 'react'
-import { connect } from 'react-redux'
 
 
 const smartClip = (s, w, fw) => {
@@ -38,18 +37,4 @@ const Presentational = props => {
 }
 
 
-const mapStateToProps = state => {
-	return {}
-}
-
-const mapDispatchToProps = dispatch => {
- 	return {}
-}
-
-
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
-
-export default Container
+export default Presentational

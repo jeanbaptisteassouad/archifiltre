@@ -1,7 +1,4 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { selectDatabase, selectIcicleState } from 'reducers/root-reducer'
-import { sortBySize } from 'reducers/database'
 
 import { tr } from 'dict'
 import * as Color from 'color'
@@ -18,7 +15,7 @@ class Presentational extends React.PureComponent {
     super(props)
 
     this.fillColor = this.fillColor.bind(this)
-    this.props.dispatch(sortBySize())
+    // this.props.dispatch(sortBySize())
   }
 
 
@@ -38,6 +35,15 @@ class Presentational extends React.PureComponent {
   }
 
   render() {
+    // const database = selectDatabase(state)
+    // const icicle_state = selectIcicleState(state)
+
+    // return {
+    //   getByID: database.getByID,
+    //   display_root: icicle_state.display_root(),
+    // }
+
+
     return (
       <div className='grid-y grid-frame'>
 
@@ -72,27 +78,3 @@ class Presentational extends React.PureComponent {
   }
 }
 
-
-const mapStateToProps = state => {
-  const database = selectDatabase(state)
-  const icicle_state = selectIcicleState(state)
-
-  return {
-    getByID: database.getByID,
-    display_root: icicle_state.display_root(),
-  }
-}
- 
-const mapDispatchToProps = dispatch => {
-  return {
-    dispatch,
-  }
-}
-
-
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
-
-export default Container

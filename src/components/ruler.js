@@ -1,8 +1,4 @@
 import React from 'react'
-import { connect } from 'react-redux'
-
-import { selectIcicleState, selectDatabase } from 'reducers/root-reducer'
-
 
 import * as Color from 'color'
 
@@ -129,41 +125,33 @@ const computeTextPosition = (x, dx, w, mode) => {
 
 
 
+export default (props) => {
+  const api = props.api
+  const icicle_state = api.icicle_state
 
-const mapStateToProps = state => {
-	const icicle_state = selectIcicleState(state)
-  const database = selectDatabase(state)
-
-  const node_id = icicle_state.isLocked() ?
-    icicle_state.lock_sequence()[icicle_state.lock_sequence().length - 1]
-    : icicle_state.hover_sequence()[icicle_state.hover_sequence().length - 1];
-
-  const total_size = database.volume()
-
-  const getByID = database.getByID
-  const node = getByID(node_id)
-  let node_size
-  if (node) {
-    node_size = node.get('content').get('size')
+  let node_id
+  if (icicle_state.isLocked()) {
+    node_id = icicle_state.lock_sequence()[icicle_state.lock_sequence().length - 1]
+  } else {
+    node_id = icicle_state.hover_sequence()[icicle_state.hover_sequence().length - 1]
   }
 
-	return {
-		dims: icicle_state.hover_dims(),
+  // const total_size = database.volume()
+
+  // const getByID = database.getByID
+  // const node = getByID(node_id)
+  // let node_size
+  // if (node) {
+  //   node_size = node.get('content').get('size')
+  // }
+
+  props = ObjectUtil.compose({
+    dims: icicle_state.hover_dims(),
     isFocused: icicle_state.isFocused(),
     node_size,
     node_id,
     total_size,
-	}
+  },props)
+
+  return (<Presentational {...props}/>)
 }
-
-const mapDispatchToProps = dispatch => {
- 	return {}
-}
-
-
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
-
-export default Container

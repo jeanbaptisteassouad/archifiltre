@@ -6,7 +6,7 @@ import * as Tags from 'datastore/tags'
 const virtualFileSystem = RecordUtil.createFactory({
   session_name:'Untitled',
   version:9,
-  files_and_folders:FilesAndFolders.emptyFf(),
+  files_and_folders:FilesAndFolders.empty(),
   tags:Tags.empty(),
 },{
   toJs: a => {

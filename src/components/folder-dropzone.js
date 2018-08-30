@@ -1,10 +1,6 @@
 import React from 'react'
-// import { connect } from 'react-redux'
 
-import * as TraverseFileTree from 'traverse-file-tree'
-// import { push, fromJson, makeTree, fromLegacyCsv, workerPush, workerMakeTree } from 'reducers/database'
-// import { startToLoadFiles, finishedToLoadFiles } from 'reducers/app-state'
-// import { commit } from 'reducers/root-reducer'
+import AsyncHandleDrop from 'async-handle-drop'
 
 import TextAlignCenter from 'components/text-align-center'
 
@@ -42,32 +38,18 @@ export default class FolderDropzone extends React.Component {
 
   handleDrop (e) {
     e.preventDefault()
-    // this.props.startToLoadFiles()
-    console.log(e.dataTransfer.files[0].path,TraverseFileTree.traverseFileTree(e.dataTransfer.files[0].path))
-    // TraverseFileTree.asyncHandleDrop(e,this.props.push,this.props.fromJson,this.props.fromLegacyCsv)
-    //   .then(shouldProcess => {
-    //     if (shouldProcess) {
-    //       return this.props.makeTree()
-    //     }
-    //   })
-    //   .then(this.props.finishedToLoadFiles)
+
+    this.props.api.app_state.startToLoadFiles()
+    AsyncHandleDrop(e.dataTransfer.files[0].path)
+      .then(vfs => {
+        console.log(vfs)
+        // push to database
+        this.props.api.app_state.finishedToLoadFiles()
+        this.props.api.undo.commit()
+      })
   }
 
   render() {
-  // return {
-  //   push: (...args) => dispatch(workerPush(...args)),
-  //   makeTree: (...args) => dispatch(workerMakeTree(...args)),
-  //   sort: (...args) => dispatch(sort(...args)),
-  //   fromJson: (...args) => dispatch(fromJson(...args)),
-  //   fromLegacyCsv: (...args) => dispatch(fromLegacyCsv(...args)),
-  //   startToLoadFiles: (...args) => dispatch(startToLoadFiles(...args)),
-  //   finishedToLoadFiles: (...args) => {
-  //     dispatch(finishedToLoadFiles(...args))
-  //     dispatch(commit())
-  //   },
-  // }
-
-
     return (
       <div
         className='grid-y grid-frame align-center'

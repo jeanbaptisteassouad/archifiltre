@@ -1,8 +1,4 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { selectDatabase, selectIcicleState, commit } from 'reducers/root-reducer'
-
-import { setDisplayRoot, setNoDisplayRoot, setFocus, setNoFocus, lock, unlock } from 'reducers/icicle-state'
 
 import IcicleRect from 'components/icicle-rect'
 import Ruler from 'components/ruler'
@@ -16,6 +12,9 @@ import { animate, clear } from 'animation-daemon'
 import * as Color from 'color'
 
 import { tr } from 'dict'
+
+import ObjectUtil from 'util/object-util'
+
 
 const nothing = ()=>{}
 
@@ -645,42 +644,33 @@ class Presentational extends React.PureComponent {
   }
 }
 
-const mapStateToProps = state => {
-  const database = selectDatabase(state)
-  const icicle_state = selectIcicleState(state)
 
+export default (props) => {
+  const api = props.api
+  const icicle_state = api.icicle_state
 
   const lock_sequence = icicle_state.lock_sequence()
   const isLocked = lock_sequence.length > 0
 
-  return {
-    getByID: database.getByID,
-    root_id: database.rootId(),
+  props = ObjectUtil.compose({
+    // getByID: database.getByID,
+    // root_id: database.rootId(),
     display_root: icicle_state.display_root(),
-    getIDPath: database.getIDPath,
-    max_depth: database.maxDepth(),
+    // getIDPath: database.getIDPath,
+    // max_depth: database.maxDepth(),
     isLocked,
-  }
-}
- 
-const mapDispatchToProps = dispatch => {
-  return {
-    setFocus: (...args) => dispatch((setFocus(...args))),
-    setNoFocus: (...args) => dispatch((setNoFocus(...args))),
-    lock: (...args) => {
-      dispatch((lock(...args)))
-      dispatch(commit())
+
+    setFocus: icicle_state.setFocus,
+    setNoFocus: icicle_state.setNoFocus,
+    lock: () => {
+      icicle_state.lock()
+      icicle_state.commit()
     },
-    unlock: (...args) => dispatch((unlock(...args))),
-    setDisplayRoot: (...args) => dispatch(setDisplayRoot(...args)),
-    setNoDisplayRoot: (...args) => dispatch(setNoDisplayRoot(...args)),
-  }
+    unlock: icicle_state.unlock,
+    setDisplayRoot: icicle_state.setDisplayRoot,
+    setNoDisplayRoot: icicle_state.setNoDisplayRoot,
+  },props)
+
+  return (<Presentational {...props}/>)
 }
 
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
-
-export default Container
-        

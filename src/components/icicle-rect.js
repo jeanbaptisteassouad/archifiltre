@@ -1,11 +1,7 @@
 import React from 'react'
-import { connect } from 'react-redux'
 
-import { selectDatabase, selectIcicleState, commit } from 'reducers/root-reducer'
+import ObjectUtil from 'util/object-util'
 
-import { setFocus, setNoFocus, setDisplayRoot, lock } from 'reducers/icicle-state'
-
-import { isLeaf } from 'table-tree'
 
 class SvgRectangle extends React.PureComponent {
   // shouldComponentUpdate(nextProps, nextState) {
@@ -156,44 +152,33 @@ class Presentational extends React.PureComponent {
   }
 }
 
-
-
-const mapStateToProps = (state, props) => {
-  const database = selectDatabase(state)
+export default (props) => {
+  const api = props.api
+  const icicle_state = api.icicle_state
   const icicle_state = selectIcicleState(state)
   const hover_sequence = icicle_state.hover_sequence()
   const lock_sequence = icicle_state.lock_sequence()
   const tag_to_highlight = icicle_state.tag_to_highlight()
 
-  const node_tags = database.getTags(props.node_id)
-
+  // const node_tags = database.getTags(props.node_id)
 
   const isInHoverSeq = hover_sequence.includes(props.node_id)
   const isInLockSeq = lock_sequence.includes(props.node_id)
-  const hasTags = node_tags.size > 0
-  const highlightingATag = tag_to_highlight.length > 0
-  const hasTagToHighlight = node_tags.includes(tag_to_highlight)
+  // const hasTags = node_tags.size > 0
+  // const highlightingATag = tag_to_highlight.length > 0
+  // const hasTagToHighlight = node_tags.includes(tag_to_highlight)
 
 
-  return {
+  props = ObjectUtil.compose({
     isFocused: icicle_state.isFocused(),
     isLocked: icicle_state.isLocked(),
     isInHoverSeq,
     isInLockSeq,
     hasTags,
     highlightingATag,
-    hasTagToHighlight
-  }
+    hasTagToHighlight,
+  },props)
+
+  return (<Presentational {...props}/>)
 }
 
-const mapDispatchToProps = dispatch => {
-  return {}
-}
-
-
-const Container = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Presentational)
-
-export default Container
