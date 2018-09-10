@@ -20,5 +20,7 @@
   "devDependencies": {
     "electron": "2.0.5"
   },
-  "dependencies": {}
+  "dependencies": {
+    "xlsx": "0.14.0"
+  }
 }

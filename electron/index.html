@@ -18,6 +18,162 @@
 // Test Fs use
 const fs = require('fs')
 
+// const PDFjs = require('pdfjs-dist')
+// PDFjs.GlobalWorkerOptions.workerSrc = 'node_modules/pdfjs-dist/lib/pdf.worker.js';
+
+// const pdf = require('pdf-parse')
+// PDFJS.workerSrc = 'node_modules/pdf-parse/lib/v1.9.426/build/pdf.worker.js';
+
+// const office = require('office')
+// const office = require('office-document-properties')
+const xlsx = require('xlsx')
+
+const extension_groups = [
+  {
+    group_name: 'images',
+    group_exts: ['jpg', 'jpeg', 'png', 'gif', 'xcf', 'psd', 'tiff', 'bmp'],
+    analyser: (path) => ({encoding: 'utf8', weight:5, content: fs.readFileSync(path, 'utf8')})
+  },
+  {
+    group_name: 'videos',
+    group_exts: ['mp4', 'mkv', 'avi', 'mov', 'wmv'],
+    analyser: (path) => ({encoding: 'utf8', weight:10, content: fs.readFileSync(path, 'utf8')})
+  },
+  {
+    group_name: 'mail',
+    group_exts: ['msg', 'eml', 'pst'],
+    analyser: (path) => ({encoding: 'utf8', weight:11, content: fs.readFileSync(path, 'utf8')})
+  },
+  {
+    group_name: 'documents_office',
+    group_exts: ['docx'],
+    analyser: (path) => ({encoding: 'utf8', weight:11.3, content: fs.readFileSync(path, 'utf8')}) // To replace with proper handler
+  },
+  {
+    group_name: 'documents_office_old',
+    group_exts: ['doc'],
+    analyser: (path) => {
+      // const Word = office.Word
+      // Word.open(path, (err, doc) => {
+      //   if(err) throw err;
+      //   console.log('Pages : ' + doc.pages().length)
+      //   presentation.close(null, (err) => {
+      //     if(err) throw err;
+      //     powerpoint.quit()
+      //   });
+      // })
+      // return office.parse(path, (err, data) => ({encoding: 'utf8', weight:11.4, content: data})
+
+      // console.log(office.fromFilePath(path, (err, data) => {
+      //   console.log("hello")
+      //   // if (err) throw err;
+      //   console.log(data);
+        return ({encoding: 'utf8', weight:11.4, content: fs.readFileSync(path, 'utf8')})
+      // })
+      // )
+
+    }
+  },
+  {
+    group_name: 'slideshow_office',
+    group_exts: ['pptx'],
+    analyser: (path) => ({encoding: 'utf8', weight:11.5, content: fs.readFileSync(path, 'utf8')}) // To replace with proper handler
+  },
+  {
+    group_name: 'slideshow_office_old',
+    group_exts: ['ppt'],
+    analyser: (path) => ({encoding: 'utf8', weight:11.6, content: fs.readFileSync(path, 'utf8')}) // To replace with proper handler
+  },
+  {
+    group_name: 'spreadsheet_office',
+    group_exts: ['xlsx'],
+    analyser: (path) => {
+      const spreadsheet = xlsx.readFile(path)
+      const sheets_count = spreadsheet.SheetNames.length
+
+      return ({encoding: 'utf8', weight: sheets_count, content: fs.readFileSync(path, 'utf8')})
+    }
+  },
+  {
+    group_name: 'spreadsheet_office_old',
+    group_exts: ['xls'],
+    // analyser: (path) => ({encoding: 'utf8', weight:11.8, content: fs.readFileSync(path, 'utf8')}) // To replace with proper handler
+    analyser: (path) => {
+      const spreadsheet = xlsx.readFile(path)
+      const sheets_count = spreadsheet.SheetNames.length
+
+      return ({encoding: 'utf8', weight: sheets_count, content: fs.readFileSync(path, 'utf8')})
+    }
+  },
+  {
+    group_name: 'pdf',
+    group_exts: ['pdf'],
+    analyser: (path) => {
+      // let pdfParser = new PDFParser();
+      // let doc;
+ 
+      // pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError) );
+      // pdfParser.on("pdfParser_dataReady", pdfData => {
+      //     doc = pdfData;
+      // });
+   
+      // pdfParser.loadPDF(path);
+
+      // const doc = PDFjs.getDocument(path);
+      // const numPages = doc.then(document => document.numPages)
+
+      // return doc.then(document => ({encoding: 'utf8', weight: document.numPages, content: document}))
+
+
+      // let dataBuffer = fs.readFileSync(path)
+      // return pdf(dataBuffer).then(data => ({encoding: 'utf8', weight: data.numPages, content: text}))
+      return {encoding: 'utf8', weight:11.8, content: fs.readFileSync(path, 'utf8')}
+    } 
+  },
+]
+
+const getContentAnalyser = (path, ext) => extension_groups.reduce(
+  (acc, val) => (val.group_exts.includes(ext) ? val.analyser : acc),
+  (filepath) => ({encoding: 'utf8', weight: 10, content: fs.readFileSync(filepath, 'utf8')})
+)
+
+const analyseObject = (filepath) => {
+  const filename = filepath.split('/').slice(-1)[0]
+  const extension = filename.includes('.') ? filename.split('.').slice(-1)[0] : null
+
+  const analysis = getContentAnalyser(filepath, extension)(filepath)
+
+  // const encoding = 'utf8' // maybe a function of extension found in file name?
+  // const content = fs.readFileSync(filepath, encoding)
+
+  // const weight = computeWeight(content, extension)
+
+  return {
+    filename,
+    extension,
+    encoding: analysis.encoding,
+    weight: analysis.weight,
+    content: analysis.content,
+  }
+}
+
+
+const recTraverseFileTree = (path) => {
+  const stats = fs.statSync(path)
+  if (stats.isDirectory()) {
+    return fs.readdirSync(path)
+      .map(a=>recTraverseFileTree(path+'/'+a))
+      .reduce((acc,val)=>acc.concat(val),[])
+  } else {
+    const file = {
+      content:analyseObject(path),
+      size:stats.size,
+      lastModified:stats.mtimeMs,
+    }
+    return [[file,path]]
+  }
+}
+
 document.ondragover = document.ondrop = (ev) => {
   ev.preventDefault()
 }
@@ -30,9 +186,13 @@ document.body.ondrop = (ev) => {
   // console.log(fs.readdirSync(path))
 
   // Test open file
-  const {shell} = require('electron')
+  // const {shell} = require('electron')
   // Open a local file in the default app
-  shell.openItem(path)
+  // shell.openItem(path)
+
+  const file_array = recTraverseFileTree(path)
+
+  console.log(file_array)
 
   ev.preventDefault()
 }
