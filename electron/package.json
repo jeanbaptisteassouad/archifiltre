@@ -21,6 +21,7 @@
     "electron": "2.0.5"
   },
   "dependencies": {
-    "xlsx": "0.14.0"
+    "xlsx": "0.14.0",
+    "pptx-compose": "0.4.0"
   }
 }

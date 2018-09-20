@@ -26,7 +26,8 @@ const fs = require('fs')
 
 // const office = require('office')
 // const office = require('office-document-properties')
-const xlsx = require('xlsx')
+const xlsx_parser = require('xlsx')
+const pptx_parser = require('pptx-compose')
 
 const extension_groups = [
   {
@@ -77,7 +78,12 @@ const extension_groups = [
   {
     group_name: 'slideshow_office',
     group_exts: ['pptx'],
-    analyser: (path) => ({encoding: 'utf8', weight:11.5, content: fs.readFileSync(path, 'utf8')}) // To replace with proper handler
+    analyser: (path) => {
+      console.log({pptx_parser})
+      pptx_parser.parse(path, (err, json) => {
+        console.log(JSON.stringify(json, null, 2));
+      });
+    }
   },
   {
     group_name: 'slideshow_office_old',
@@ -88,7 +94,7 @@ const extension_groups = [
     group_name: 'spreadsheet_office',
     group_exts: ['xlsx'],
     analyser: (path) => {
-      const spreadsheet = xlsx.readFile(path)
+      const spreadsheet = xlsx_parser.readFile(path)
       const sheets_count = spreadsheet.SheetNames.length
 
       return ({encoding: 'utf8', weight: sheets_count, content: fs.readFileSync(path, 'utf8')})
@@ -99,7 +105,7 @@ const extension_groups = [
     group_exts: ['xls'],
     // analyser: (path) => ({encoding: 'utf8', weight:11.8, content: fs.readFileSync(path, 'utf8')}) // To replace with proper handler
     analyser: (path) => {
-      const spreadsheet = xlsx.readFile(path)
+      const spreadsheet = xlsx_parser.readFile(path)
       const sheets_count = spreadsheet.SheetNames.length
 
       return ({encoding: 'utf8', weight: sheets_count, content: fs.readFileSync(path, 'utf8')})
