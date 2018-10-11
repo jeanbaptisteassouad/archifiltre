@@ -78,5 +78,15 @@ sudo apt-get -y install wine-gecko
 
 ###########################
 printHeader 'genIcon.bash deps'
-bin/genIcon.bash install
+
+sudo apt-get update
+sudo apt-get -y install imagemagick
+sudo apt-get -y install icnsutils
+sudo apt-get -y install icoutils
+
+
+
+
+
+
 
