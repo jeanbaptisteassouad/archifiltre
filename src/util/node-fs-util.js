@@ -68,7 +68,7 @@ const recAddToPack = (hook,path,name,pack) => {
   })
 }
 
-export const tar2 = (hook,old_path,new_path) => {
+export const tar2 = (hook,old_paths,new_path) => {
   return new Promise((resolve,reject) => {
     const pack = TarStream.pack()
 
@@ -77,12 +77,20 @@ export const tar2 = (hook,old_path,new_path) => {
 
     pack.pipe(write_stream)
     .on('finish',()=>{
+      console.log('finish')
+    })
+    .on('close',()=>{
+      console.log('close')
       resolve()
     })
 
-    const name = Path.basename(old_path)
+    old_paths.map((old_path)=>()=>{
+      const name = Path.basename(old_path)
 
-    recAddToPack(hook,old_path,name,pack).then(()=>{
+      return recAddToPack(hook,old_path,name,pack)
+    })
+    .reduce((acc,val)=>acc.then(val),new Promise(a=>a()))
+    .then(()=>{
       pack.finalize()
     })
   })
@@ -177,36 +185,42 @@ export const gunzip = (old_path,new_path) => {
 
 
 
-export const extractByName = (name,old_path,new_path) => {
+export const readTarByName = (name,old_path,new_path) => {
   return new Promise((resolve,reject) => {
+    let content = ''
     const read_stream = Fs.createReadStream(old_path)
 
     const extract = TarStream.extract()
      
     extract.on('entry', function(header, stream, next) {
-      if (header.type === 'file' && header.name === name) {
-        const path = Path.join(new_path,header.name)
-        mkdir(Path.dirname(path))
-        const write_stream = Fs.createWriteStream(path)
-        stream.pipe(write_stream)
-      }
-
       stream.on('end', function() {
         next()
       })
-     
-      stream.resume()
+
+      if (header.type === 'file' && header.name === name) {
+        // const path = Path.join(new_path,header.name)
+        // mkdir(Path.dirname(path))
+        // const write_stream = Fs.createWriteStream(path)
+        // stream.pipe(write_stream)
+
+        stream.setEncoding('utf8')
+        stream.on('data',(chunk)=>{
+          content += chunk
+        })
+      } else {
+        stream.resume()
+      }
     })
      
     extract.on('finish', function() {
-      resolve()
+      resolve(content)
     })
 
     read_stream.pipe(extract)
   })
 }
 
-export const packByName = (content,name,old_path,new_path) => {
+export const updateTarByName = (content,name,old_path,new_path) => {
   return new Promise((resolve,reject) => {
     const pack = TarStream.pack()
     const extract = TarStream.extract()
@@ -218,8 +232,12 @@ export const packByName = (content,name,old_path,new_path) => {
 
 
     extract.on('entry', function(header, stream, callback) {
+      console.log(header)
       if (header.type === 'file' && header.name === name) {
-        pack.entry(header,content,callback)
+        stream.on('end',()=>{
+          pack.entry(header,content,callback)
+        })
+        stream.resume()
       } else {
         stream.pipe(pack.entry(header, callback))
       }
@@ -232,6 +250,10 @@ export const packByName = (content,name,old_path,new_path) => {
     read_stream.pipe(extract)
     pack.pipe(write_stream)
     .on('finish',()=>{
+      // resolve()
+    })
+    .on('close',()=>{
+      console.log('close')
       resolve()
     })
   })

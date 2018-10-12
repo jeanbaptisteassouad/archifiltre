@@ -27,8 +27,8 @@ import pick from 'languages'
 
 
 
-// import * as NodeFsUtil from 'util/node-fs-util'
-// let count
+import * as NodeFsUtil from 'util/node-fs-util'
+let count
 
 // console.time('all')
 // console.time('copy')
@@ -58,13 +58,13 @@ import pick from 'languages'
 //   console.time('last step')
 //   return NodeFsUtil.tar2(()=>{},'/home/jibe/Desktop/tmp/a3','/home/jibe/Desktop/tmp/a4.tar')
 // })
-// // .then(()=>{
-// //   return NodeFsUtil.extractByName(
-// //     'input.json',
-// //     '/home/jibe/Desktop/tmp/a4.tar',
-// //     '/home/jibe/Desktop/tmp'
-// //   )
-// // })
+// .then(()=>{
+//   return NodeFsUtil.extractByName(
+//     'input.json',
+//     '/home/jibe/Desktop/tmp/a4.tar',
+//     '/home/jibe/Desktop/tmp'
+//   )
+// })
 // .then(()=>{
 //   console.log('ZZZZZZZZZZZZZZ')
 //   return NodeFsUtil.packByName(
@@ -74,117 +74,73 @@ import pick from 'languages'
 //     '/home/jibe/Desktop/tmp/a4.2.tar'
 //   )
 // })
-// // .then(()=>{
-// //   console.timeEnd('last step')
-// //   console.log('AAAAAAAAAAAAAA')
-// //   return NodeFsUtil.untar(()=>{},'/home/jibe/Desktop/tmp/a4.2.tar','/home/jibe/Desktop/tmp/a5')
-// // })
-// // .then(()=>{
-// //   console.log('BBBBBBBBBBBBBB')
-// //   return NodeFsUtil.gunzip('/home/jibe/Desktop/tmp/a5/a3.tar.gz','/home/jibe/Desktop/tmp/a6.tar')
-// // })
-// // .then(()=>{
-// //   console.log('CCCCCCCCCCCCCC')
-// //   return NodeFsUtil.untar(()=>{},'/home/jibe/Desktop/tmp/a6.tar','/home/jibe/Desktop/tmp/a7')
-// // })
-// // .then(()=>{
-// //   console.timeEnd('all')
-// // })
+// .then(()=>{
+//   console.timeEnd('last step')
+//   console.log('AAAAAAAAAAAAAA')
+//   return NodeFsUtil.untar(()=>{},'/home/jibe/Desktop/tmp/a4.2.tar','/home/jibe/Desktop/tmp/a5')
+// })
+// .then(()=>{
+//   console.log('BBBBBBBBBBBBBB')
+//   return NodeFsUtil.gunzip('/home/jibe/Desktop/tmp/a5/a3.tar.gz','/home/jibe/Desktop/tmp/a6.tar')
+// })
+// .then(()=>{
+//   console.log('CCCCCCCCCCCCCC')
+//   return NodeFsUtil.untar(()=>{},'/home/jibe/Desktop/tmp/a6.tar','/home/jibe/Desktop/tmp/a7')
+// })
+// .then(()=>{
+//   console.timeEnd('all')
+// })
 
 
 
 
 
 
+const input_paths = [
+  '/home/jibe/Desktop/input.json',
+  '/home/jibe/Desktop/folder',
+]
+const tar_path = '/home/jibe/Desktop/t.tar'
+const updated_tar_path = '/home/jibe/Desktop/t2.tar'
+const last_tar_path = '/home/jibe/Desktop/t3.tar'
 
 
-
-
-
-
-
-
-
-
-
-
-// import * as NodeFsUtil from 'util/node-fs-util'
-
-// const Fs = require('fs')
-// const Path = require('path')
-
-// const Tar = require('tar-stream')
-
-// const extractTest = () => {
-
-//   const read_stream = Fs.createReadStream('/home/jibe/Desktop/folder.tar')
-
-//   const extract = Tar.extract()
-   
-//   extract.on('entry', function(header, stream, next) {
-//     // header is the tar header
-//     // stream is the content body (might be an empty stream)
-//     // call next when you are done with this entry
-
-//     // console.log(header)
-
-//     if (header.type === 'file' && header.name === 'input.txt') {
-//       const path = '/home/jibe/Desktop/baba/'+header.name
-//       NodeFsUtil.mkdir(Path.dirname(path))
-//       const write_stream = Fs.createWriteStream(path)
-//       stream.pipe(write_stream)
-//     }
-
-//     stream.on('end', function() {
-//       next() // ready for next entry
-//     })
-   
-//     stream.resume() // just auto drain the stream
+NodeFsUtil.tar2(()=>{},input_paths,tar_path)
+// .then(()=>{
+//   console.log('aaaaaaaaa')
+//   return NodeFsUtil.updateTarByName(
+//     'ttttttttt',
+//     'input.json',
+//     tar_path,
+//     updated_tar_path,
+//   )
+// })
+// .then(()=>{
+//   console.log('bbbbbbbbb')
+//   return NodeFsUtil.readTarByName(
+//     'input.json',
+//     updated_tar_path,
+//   )
+// })
+// .then(()=>{
+//   return new Promise((resolve,reject) => {
+//     setTimeout(function() {resolve()}, 1000)
 //   })
-   
-//   extract.on('finish', function() {
-//     // all entries read
-//   })
-
-//   console.time('tar')
-//   read_stream.pipe(extract)
-//   .on('finish',()=>console.timeEnd('tar'))
-// }
-
-
-
-
-// const packTest = () => {
-//   const pack = Tar.pack()
-//   const extract = Tar.extract()
-
-//   const read_stream = Fs.createReadStream('/home/jibe/Desktop/folder.tar')
-
-//   const write_stream = Fs.createWriteStream('/home/jibe/Desktop/baba.tar')
-
-//   extract.on('entry', function(header, stream, callback) {
-//     if (header.type === 'file' && header.name === 'input.txt') {
-//       // let's prefix all names with 'tmp'
-//       header.name = Path.join('tmp', header.name)
-//       pack.entry(header,'tttttt', callback)
-//     } else {
-//       // write the new entry to the pack stream
-//       stream.pipe(pack.entry(header, callback))
-//     }
-//   })
-   
-//   extract.on('finish', function() {
-//     // all entries done - lets finalize it
-//     pack.finalize()
-//   })
-
-
-//   console.time('pack')
-//   read_stream.pipe(extract)
-//   pack.pipe(write_stream)
-//   .on('finish',()=>console.timeEnd('pack'))
-// }
-
+// })
+.then((a)=>{
+  console.log('cccccccccc')
+  console.log(a)
+  a = 'tststststs'
+  return NodeFsUtil.updateTarByName(
+    a+' '+a,
+    'input.json',
+    updated_tar_path,
+    last_tar_path,
+  )
+})
+// .then(()=>{
+//   NodeFsUtil.untar(()=>{},last_tar_path,'/home/jibe/Desktop/tttt')
+// })
 
 
 
