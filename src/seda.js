@@ -98,7 +98,7 @@ const makeFileAU = (item, item_tags, ID) => {
 
 	// Where to insert alias ? Tags ? Comments ?
 	AU_content.push(makeObj('DescriptionLevel', 'Item'))
-	AU_content.push(makeObj('Title', item.get('name')))
+	AU_content.push(makeObj('Title', item.get('alias').length > 0 ? item.get('alias') : item.get('name')))
 	// AU_content.push(makeObj('Type', 'DUMMY_TYPE')) // CDO ?
 	AU_content.push(makeObj('StartDate', last_modified)) // Correct ? Format ?
 	AU_content.push(makeObj('Event', [
@@ -108,6 +108,7 @@ const makeFileAU = (item, item_tags, ID) => {
 		makeObj('EventDetail', 'Créé dans ArchiFiltre.')
 	]))
 
+	if(item.get('alias').length > 0) AU_content.push(makeObj('xsi:Description', '[Nom de fichier originel] ' + item.get('name')))
 	if(item.get('comments').length > 0) AU_content.push(makeObj('xsi:Description', item.get('comments').replace(/[^\w ]/g, '_')))
 
 	item_tags.forEach((a)=>{
@@ -130,8 +131,9 @@ const makeFolderAUChildren = (item, item_tags, ID) => {
 	let AU_content = new Array()
 
 	AU_content.push(makeObj('DescriptionLevel', 'RecordGrp'))
-	AU_content.push(makeObj('Title', item.get('name')))
+	AU_content.push(makeObj('Title', item.get('alias').length > 0 ? item.get('alias') : item.get('name')))
 
+	if(item.get('alias').length > 0) AU_content.push(makeObj('xsi:Description', '[Nom de répertoire originel] ' + item.get('name')))
 	if(item.get('comments').length > 0) AU_content.push(makeObj('xsi:Description', item.get('comments').replace(/[^\w ]/g, '_')))
 
 	item_tags.forEach((a)=>{
